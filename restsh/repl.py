@@ -22,8 +22,8 @@ def repLoop(environment:Environment) -> Eval:
         exprs = []
 
         try:
-            tokens = read(environment, tokens)
-            #print('tokenized: %s' % tokens)
+            tokens = read(environment, previousTokens)
+            print('tokenized: %s' % tokens)
         except EndOfFile:
             environment.loop = False
         except UntokenizableError as ex:
@@ -33,21 +33,23 @@ def repLoop(environment:Environment) -> Eval:
             try:
                 #print('parsing')
                 exprs = parse(tokens)
-                #print('expression: %s' % exprs)
+                tokens = []
+                print('expression: %s' % exprs)
             except ParseError as ex:
                 environment.print(
                     'parse error, expected one of: %s' % \
                     ', '.join([token.__name__ for token in set(ex.tokens)]))
             except EndOfTokens:
-                #print('END OF TOKENS')
+                print('END OF TOKENS')
                 if previousTokens == tokens:
                     environment.print('parse error')
+                    tokens = []
                 else:
                     continue
         
         if exprs:
             try:
-                #print('expressions: %s' % exprs)
+                print('expressions: %s' % exprs)
                 for expr in exprs:
                     result = expr.evaluate(environment)
                     if environment.input == sys.stdin and printable(expr):

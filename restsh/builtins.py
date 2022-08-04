@@ -1,6 +1,7 @@
 from typing import cast, Union, Dict, Callable, Tuple, List, Optional, Any
 import io
 import os
+import sys
 import json
 from .environment import Environment, Cell
 from .evaluate import dereference, wrap, Eval, Builtin, Array, Function, ServiceObject, DictObject, String, Boolean \
@@ -9,14 +10,14 @@ from .repl import repLoop
 
 builtins:Dict[
         str,
-        Tuple[ Callable[[Environment, Dict[str,Eval]], Union[Eval, Cell]], dict]
+        Tuple[ Callable[[Environment, Dict[str,Union[Eval, Cell]]], Union[Eval, Cell]], dict]
         ] = { }
 
 def add(name:str, args:Dict[str,str], retwrap:Optional[Callable[[Any], Union[Eval, Cell]]]=None
         ) -> Any:
     def wrapper(func:Callable[[Any, Any], Any]
-            ) -> Callable[[Environment, Dict[str,Eval]], Union[Eval, Cell]]:
-        def run(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+            ) -> Callable[[Environment, Dict[str,Union[Eval, Cell]]], Union[Eval, Cell]]:
+        def run(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
 
             result = func(environment, {key: dereference(arg) for key, arg in args.items()})
 
@@ -155,15 +156,33 @@ def bParsejson(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell
     return wrap(json.loads(string))
 
 
-def bSet(environment:Environment, args:Dict[str,Union[Cell,Eval]]) -> Union[Eval, Cell]:
+def bSet(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     cell = args['var']
     value = args['value']
 
-    cell.set(value)
+    if isinstance(cell, String):
+        cell = environment.setVariable(cell.getValue(), value)
+    elif isinstance(cell, Cell):
+        cell.set(value)
+    else:
+        environment.error('var must be either a string, or variable')
+
     return cell
 
-builtins['set'] = (bSet, {'var': 'cell', 'value': 'any'})
+builtins['set'] = (bSet, {'var': 'any', 'value': 'any'})
 
+@add('source', {'file': 'string'})
+def bSource(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+    filename = cast(String, args['file']).getValue()
+
+    with open(os.path.expanduser(filename), 'r', encoding='utf-8') as rsource:
+        environment.input = rsource
+        try:
+            repLoop(environment)
+            return environment.lastResult
+        finally:
+            environment.input = sys.stdin
+            environment.loop = True
 
 
 def register(environment:Environment):

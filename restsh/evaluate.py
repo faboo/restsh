@@ -118,7 +118,8 @@ class Array(Eval):
         return Array(elements.elements)
 
     def isType(self, typeDesc:str) -> bool:
-        return super().isType(typeDesc) or typeDesc.startswith('array')
+        return super().isType(typeDesc) or typeDesc.startswith('array') \
+            or typeDesc.startswith('collection')
 
     def evaluate(self, environment:Environment) -> Union[Eval, Cell]:
         if self.evaluated:
@@ -186,7 +187,7 @@ class Function(Object):
 class Builtin(Function):
     def __init__(self,
             name:str,
-            func:Callable[[Environment, Dict[str, Eval]], Union[Eval, Cell]],
+            func:Callable[[Environment, Dict[str, Union[Eval, Cell]]], Union[Eval, Cell]],
             params:Dict[str,str]) -> None:
         self.name = name
         self.func = func
@@ -199,7 +200,7 @@ class Builtin(Function):
         return self.params
 
     def call(self, environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
-        return self.func(environment, {key: arg for key, arg in args.items()})
+        return self.func(environment, args)
 
 
 class Closure(Function):
@@ -363,13 +364,13 @@ class ServiceObject(Object):
     def __repr__(self) -> str:
         return 'Service[%s]' % self.name
 
-    def setHost(self, environment:Environment, args:Dict[str, Eval]) -> Union[Eval, Cell]:
+    def setHost(self, environment:Environment, args:Dict[str, Union[Eval, Cell]]) -> Union[Eval, Cell]:
         host = cast(String, args['host'])
         print('Setting host', host)
         environment.services[self.name].setHost(host.getValue())
         return self
 
-    def setAuthentication(self, environment:Environment, args:Dict[str, Eval]) -> Union[Eval, Cell]:
+    def setAuthentication(self, environment:Environment, args:Dict[str, Union[Eval, Cell]]) -> Union[Eval, Cell]:
         auth = cast(String, args['auth'])
         environment.services[self.name].setAuthentication(auth.getValue())
         return self

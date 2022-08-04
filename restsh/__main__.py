@@ -8,6 +8,7 @@ from .evaluate import Null, Boolean
 from . import builtins
 from . import operators
 from . import describe
+from . import parser
 
 
 def setupArguments(args:list) -> argparse.Namespace:
@@ -45,6 +46,13 @@ def main(args:list=None):
     arguments = setupArguments(args or sys.argv[1:])
     historyName = os.path.expanduser('~/.restsh_history')
     rcfile = os.path.expanduser('~/.restshrc')
+
+    #print('start symbols: %s' % set([token.__name__ for token in parser.getStartSymbols(parser.statement)]))
+    startTable = parser.getStartTable(parser.statement)
+    print('start symbols:\n%s' % '\n'.join(
+        [ token.__name__+': '+', '.join([evl.__name__ for evl in evls])
+          for token, evls in startTable.items()
+        ]))
 
     # ensure the history file exists
     with open(historyName, mode='a', encoding='utf-8') as history:

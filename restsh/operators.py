@@ -5,7 +5,7 @@ from .evaluate import wrap, dereference, Eval, Builtin, Boolean, Constant
 operators:Dict[
         str,
         Tuple[
-            Callable[[Environment, Dict[str,Eval]], Union[Eval, Cell]],
+            Callable[[Environment, Dict[str,Union[Eval, Cell]]], Union[Eval, Cell]],
             Tuple[str, str]
             ]
         ] = { }
@@ -14,8 +14,8 @@ operators:Dict[
 def add(name:str, args:Tuple[str,str], retwrap:Optional[Callable[[Any], Union[Eval, Cell]]]=None
         ) -> Any:
     def wrapper(func:Callable[[Any, Any], Any]
-            ) -> Callable[[Environment, Dict[str,Eval]], Union[Eval, Cell]]:
-        def run(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+            ) -> Callable[[Environment, Dict[str,Union[Eval, Cell]]], Union[Eval, Cell]]:
+        def run(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
             left = dereference(args['left'])
             right = dereference(args['right'])
 
@@ -33,7 +33,7 @@ def add(name:str, args:Tuple[str,str], retwrap:Optional[Callable[[Any], Union[Ev
     return wrapper
 
 
-def bEqual(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+def bEqual(environment:Environment, args:Dict[str,Union[Cell, Eval]]) -> Union[Eval, Cell]:
     return Boolean(dereference(args['left']).equal(dereference(args['right'])))
 operators['=='] = (bEqual, ('any', 'any'))
 
@@ -46,19 +46,16 @@ def bAdd(left:int, right:int) -> int:
 @add('-', ('integer', 'integer'))
 def bMinus(left:int, right:int) -> int:
     return left - right
-operators['-'] = (bMinus, ('integer', 'integer'))
 
 
 @add('*', ('integer', 'integer'))
 def bMultiply(left:int, right:int) -> int:
     return left * right
-operators['*'] = (bMultiply, ('integer', 'integer'))
 
 
 @add('/', ('integer', 'integer'))
 def bDivide(left:int, right:int) -> int:
     return left // right
-operators['/'] = (bDivide, ('integer', 'integer'))
 
 
 @add('<', ('integer', 'integer'))
@@ -69,13 +66,16 @@ def bLessThan(left:int, right:int) -> bool:
 @add('||', ('boolean', 'boolean'))
 def bOr(left:bool, right:bool) -> bool:
     return left or right
-operators['||'] = (bOr, ('boolean', 'boolean'))
 
 
 @add('&&', ('boolean', 'boolean'))
 def bAnd(left:bool, right:bool) -> bool:
     return left and right
-operators['&&'] = (bAnd, ('boolean', 'boolean'))
+
+
+@add('|', ('string', 'string'))
+def bConcat(left:str, right:str) -> str:
+    return left + right
 
 
 def register(environment:Environment):
