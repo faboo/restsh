@@ -1,10 +1,10 @@
 from typing import cast, List, Tuple, Type, Union, Any, Optional
 from .token import Token, Sym, Op, Eq, Dot, LParen, RParen, LBrace, RBrace, LBracket, RBracket \
     , Comma, Colon, SemiColon, Bang, BSlash \
-    , Let, Imp, Help, Ext, Str, Flt, Int
+    , Let, Imp, Help, Ext, Try, Str, Flt, Int
 from .evaluate import Eval, Variable, ObjectRef, Define, Float, Integer, String, Array, Assignment, Import \
     , Arg, ArgList, Call, OpCall, ElementList, DictObject, Subscript, Not, ParamList, Closure \
-    , Describe, Exit, Group, Block
+    , Describe, Exit, TryException, Group, Block
 
 class EndOfTokens(Exception):
     pass
@@ -284,6 +284,11 @@ opcall = Production(
     name='opcall'
     )
 
+tryex = Production(
+    (TryException, [Try, expression]),
+    name='try'
+    )
+
 subscript = Production(
     (Subscript, [variable, LBracket, expression, RBracket]),
     name='subscript'
@@ -349,6 +354,7 @@ expression.extend(
     closure,
     boolean,
     # Left recursive
+    tryex,
     objectRef,
     subscript,
     call,

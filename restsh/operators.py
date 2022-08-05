@@ -19,12 +19,16 @@ def add(name:str, args:Tuple[str,str], retwrap:Optional[Callable[[Any], Union[Ev
             left = dereference(args['left'])
             right = dereference(args['right'])
 
-            result = func(cast(Constant, left).getValue(), cast(Constant, right).getValue())
+            try:
+                result = func(cast(Constant, left).getValue(), cast(Constant, right).getValue())
 
-            if retwrap:
-                return retwrap(result)
-            else:
-                return wrap(result)
+                if retwrap:
+                    return retwrap(result)
+                else:
+                    return wrap(result)
+            except Exception as ex:
+                environment.error("%s: %s" % (ex.__class__.__name__, ' '.join(ex.args)))
+                return wrap(None)
 
         operators[name] = (run, args)
 

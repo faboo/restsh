@@ -19,12 +19,16 @@ def add(name:str, args:Dict[str,str], retwrap:Optional[Callable[[Any], Union[Eva
             ) -> Callable[[Environment, Dict[str,Union[Eval, Cell]]], Union[Eval, Cell]]:
         def run(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
 
-            result = func(environment, {key: dereference(arg) for key, arg in args.items()})
+            try:
+                result = func(environment, {key: dereference(arg) for key, arg in args.items()})
 
-            if retwrap:
-                return retwrap(result)
-            else:
-                return wrap(result)
+                if retwrap:
+                    return retwrap(result)
+                else:
+                    return wrap(result)
+            except Exception as ex:
+                environment.error("%s: %s" % (ex.__class__.__name__, ' '.join(ex.args)))
+                return wrap(None)
 
         builtins[name] = (run, args)
 

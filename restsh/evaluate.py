@@ -2,7 +2,7 @@ from typing import cast, Union, Dict, Any, List, Callable, Optional
 from .environment import Environment, Cell, EvaluationError
 from .token import Sym, Eq, LParen, RParen, LAngle, RAngle, LBrace, RBrace, LBracket, RBracket \
     , Comma, Colon, SemiColon, Bang, Dot, BSlash \
-    , Str, Flt, Int, Let, Imp, Help, Ext
+    , Str, Flt, Int, Let, Imp, Help, Ext, Try
 from .service import Service, UnsupportedProtocol
 from . import describe
 
@@ -36,6 +36,8 @@ def dereference(value:Union[Eval, Cell]) -> Eval:
 def wrap(value:Any) -> Eval:
     if isinstance(value, Eval):
         return value
+    elif isinstance(value, Cell):
+        return value.value
     elif value is None:
         return Null()
     elif isinstance(value, str):
@@ -51,7 +53,7 @@ def wrap(value:Any) -> Eval:
     elif isinstance(value, dict):
         return DictObject.fromPython(value)
     else:
-        raise EvaluationError('Unsupported native value: %s' % value)
+        raise EvaluationError('Unsupported native value: %s (%s)' % (value, value.__class__))
 
 
 class Variable(Eval):
@@ -679,6 +681,26 @@ class Exit(Eval):
     def evaluate(self, environment:Environment) -> Union[Eval, Cell]:
         environment.loop = False
         return self
+
+
+class TryException(Eval):
+    def __init__(self, expr:Eval) -> None:
+        self.expr = expr
+
+    def __repr__(self) -> str:
+        return 'try %s' % self.expr
+
+    @staticmethod
+    def parse(_:Try, expr:Eval) -> Eval:
+        return TryException(expr)
+
+    def evaluate(self, environment:Environment) -> Union[Eval, Cell]:
+        try:
+            result = self.expr.evaluate(environment)
+        except EvaluationError:
+            result = Null()
+
+        return result
 
 
 class Call(Eval):

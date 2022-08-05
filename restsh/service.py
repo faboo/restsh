@@ -190,6 +190,13 @@ class HttpService(Service):
 
 
 class AmqpService(Service):
+    def addAuth(self, auth:dict) -> None:
+        if self.authType == 'basic':
+            user, password = self.authData.split(':')
+            auth['userid'] = user
+            auth['password'] = password
+
+
     def call(self, name:str, arguments:dict) -> Any:
         import amqp #pylint: disable=import-outside-toplevel
         startTime = time.monotonic()
@@ -200,31 +207,39 @@ class AmqpService(Service):
         queue = call.get('queue', None)
         responseType = call['response']['type']
         data = call.get('body', '')
+        connConf = {}
         text = ''
         result = ''
 
         if data is not None:
             data = self.fillTemplate(data, params, arguments)
 
+        if self.needsAuth(name):
+            self.addAuth(connConf)
+
         with amqp.Connection(
                 self.host,
                 confirm_publish=True,
+                **connConf
                 ) as conn:
             response = None
             chan = conn.channel()
 
             chan.queue_declare(replyQueue, auto_delete=True)
 
+            print('publishing message: ', str(data))
             chan.basic_publish(
                 amqp.Message(data, reply_to=replyQueue),
                 routing_key=queue)
 
             while not response:
+                print('waiting')
                 response = chan.basic_get(queue=replyQueue)
                 time.sleep(0.10)
                 if (time.monotonic() - startTime) > timeout:
                     raise Exception('Call timed out after %s seconds' % timeout)
 
+            print('response')
             text = response.body.decode('utf-8')
 
             chan.close()

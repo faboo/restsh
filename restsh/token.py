@@ -46,7 +46,7 @@ class Help(Token): pass
 
 class Ext(Token): pass
 
-class Nll(Token): pass
+class Try(Token): pass
 
 class Sym(Token): pass
 
@@ -77,6 +77,7 @@ tokens:List[Tuple[Type[Token], re.Pattern]] = \
     , (Imp, re.compile(r'import\b'))
     , (Help, re.compile(r'help\b'))
     , (Ext, re.compile(r'exit\b'))
+    , (Try, re.compile(r'try\b'))
 
 
     , (Sym, re.compile('[_a-zA-Z][_a-zA-Z0-9]*'))
