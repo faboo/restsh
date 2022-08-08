@@ -1,0 +1,17 @@
+---
+protocol: https
+host: graph.microsoft.com
+authentication:
+  type: bearer
+call:
+  - name: filters
+    params:
+      mboxId: string
+    path: /beta/users/$mboxId$/MailFolders/inbox/messagerules
+    method: GET
+    response:
+      type: json
+      transform: |
+        response.value
+
+

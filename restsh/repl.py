@@ -1,5 +1,7 @@
 from typing import cast, List
 import sys
+import os
+from . import terminal
 from .environment import Environment, EvaluationError, Cell
 from .token import Token
 from .reader import read, EndOfFile, UntokenizableError
@@ -23,7 +25,7 @@ def repLoop(environment:Environment) -> Eval:
 
         try:
             tokens = read(environment, previousTokens)
-            print('tokenized: %s' % tokens)
+            #print('tokenized: %s' % tokens)
         except EndOfFile:
             environment.loop = False
         except UntokenizableError as ex:
@@ -34,7 +36,7 @@ def repLoop(environment:Environment) -> Eval:
                 #print('parsing')
                 exprs = parse(tokens)
                 tokens = []
-                print('expression: %s' % exprs)
+                #print('expression: %s' % exprs)
             except ParseError as ex:
                 environment.print(
                     'parse error, expected one of: %s' % \
@@ -49,11 +51,13 @@ def repLoop(environment:Environment) -> Eval:
         
         if exprs:
             try:
-                print('expressions: %s' % exprs)
+                #print('expressions: %s' % exprs)
                 for expr in exprs:
                     result = expr.evaluate(environment)
-                    if environment.input == sys.stdin and printable(expr):
+                    if environment.output.isatty() and printable(expr):
+                        terminal.setForeground(environment, environment.getVariable('*resultcolor').value)
                         environment.print('%s' % str(result))
+                        terminal.reset(environment)
                     environment.lastResult = result
             except EvaluationError:
                 pass

@@ -1,0 +1,14 @@
+---
+protocol: https
+host: gmail.googleapis.com
+authentication:
+  type: bearer
+call:
+  - name: deleteFilter
+    params:
+      mboxId: string
+      filterId: string
+    path: /gmail/v1/users/$mboxId$/settings/filters/$filterId$
+    method: DELETE
+
+

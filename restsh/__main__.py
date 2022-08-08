@@ -66,6 +66,7 @@ def main(args:list=None):
     environment.setVariable('false', Boolean(False))
     environment.setVariable('*prompt', '$ ')
     environment.setVariable('*continue', '.  ')
+    environment.setVariable('*resultcolor', 'green')
 
     builtins.register(environment)
     operators.register(environment)

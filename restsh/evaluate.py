@@ -373,7 +373,7 @@ class ServiceObject(Object):
         return self
 
     def setAuthentication(self, environment:Environment, args:Dict[str, Union[Eval, Cell]]) -> Union[Eval, Cell]:
-        auth = cast(String, args['auth'])
+        auth = cast(String, dereference(args['auth']))
         environment.services[self.name].setAuthentication(auth.getValue())
         return self
 

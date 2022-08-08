@@ -20,8 +20,17 @@ ParseStack = List[Union[Eval, Token]]
 
 class Production:
     def __init__(self, *rules:Union['Production', Rule], **kwargs) -> None:
-        self.name:str = str(kwargs.get('name') or '')
+        self.name:str = str(kwargs.get('name') or '') # TODO: random name
         self.rules:List[Union['Production', Rule]] = list(rules)
+
+
+    def __eq__(self, other:Any) -> bool:
+        return isinstance(other, Production) and other.name == self.name
+
+
+    def __hash__(self) -> int:
+        return hash(self.name)
+
 
     def extend(self, *rules:Union['Production', Rule]) -> None:
         self.rules = self.rules + list(rules)

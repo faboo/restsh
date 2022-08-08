@@ -1,0 +1,16 @@
+---
+protocol: https
+#host: graph.microsoft.com
+host: outlook.office.com
+authentication:
+  type: bearer
+call:
+  - name: getMessage
+    params:
+      mboxId: string
+      msgId: string
+    path: /api/v2.0/users/$mboxId$/messages/$msgId$
+    method: GET
+    response:
+      type: json
+
