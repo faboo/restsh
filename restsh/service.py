@@ -173,7 +173,7 @@ class HttpService(Service):
 
             status = response.status
             headers = response.headers
-            text = response.read()
+            text = response.read().decode('utf-8')
 
         if responseType == 'json':
             result = json.loads(text)

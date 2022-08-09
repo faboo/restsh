@@ -42,27 +42,27 @@ def bEqual(environment:Environment, args:Dict[str,Union[Cell, Eval]]) -> Union[E
 operators['=='] = (bEqual, ('any', 'any'))
 
 
-@add('+', ('integer', 'integer'))
+@add('+', ('number', 'number'))
 def bAdd(left:int, right:int) -> int:
     return left + right
 
 
-@add('-', ('integer', 'integer'))
+@add('-', ('number', 'number'))
 def bMinus(left:int, right:int) -> int:
     return left - right
 
 
-@add('*', ('integer', 'integer'))
+@add('*', ('number', 'number'))
 def bMultiply(left:int, right:int) -> int:
     return left * right
 
 
-@add('/', ('integer', 'integer'))
+@add('/', ('number', 'number'))
 def bDivide(left:int, right:int) -> int:
-    return left // right
+    return left / right
 
 
-@add('<', ('integer', 'integer'))
+@add('<', ('number', 'number'))
 def bLessThan(left:int, right:int) -> bool:
     return left < right
 

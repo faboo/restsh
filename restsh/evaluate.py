@@ -566,7 +566,7 @@ class Integer(Constant):
         return self.value
 
     def isType(self, typeDesc:str) -> bool:
-        return super().isType(typeDesc) or typeDesc == 'integer'
+        return super().isType(typeDesc) or typeDesc in ('integer', 'number')
 
 
 class Float(Constant):
@@ -584,7 +584,7 @@ class Float(Constant):
         return self.value
 
     def isType(self, typeDesc:str) -> bool:
-        return super().isType(typeDesc) or typeDesc == 'float'
+        return super().isType(typeDesc) or typeDesc in ('float', 'number')
 
 
 class Boolean(Constant):

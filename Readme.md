@@ -24,7 +24,7 @@ $ let getSender = \item. item.Sender.EmailAddress.Name
 $ let senders = map(arr: messages, fn: getSender)
 $ senders
 [ "Steven", "Molly", "Mark", "Target", "Louise", "Campaign for Better Times" ]
-$
+$ exit
 ```
 
 
@@ -98,7 +98,46 @@ It also support custom functions, defined like this:
 
 	\foo, bar. foo + bar
 
-where the above is a function that takes two arguments, `foo` and `bar`, and returns their sum.
+where the above is a function that takes two arguments, `foo` and `bar`, and returns their sum. You might call it like
+this:
+
+	$ let sum = \foo, bar. foo + bar
+	$ sum(foo: 5, bar: 3)
+	8
+	$ sum(bar: 3, foo: 5)
+	8
+
+Notice that the order of the arguments doesn't matter - just that they're named correctly. Built-in functions and service methods may also have specific type requirements for their arguments.
+
+## Variables
+
+Variables are declared with `let`, and can be assigned values with `=`.
+
+	$ let pi
+	$ pi = 3.14159 
+	$ let tau = 6.28318
+
+Assignment with `=` is a _statement_ and can only be used at the prompt or the top-level of scripts. To set the value of a variable within a function, for instance, use the `set` function.
+
+	$ let foo = 2
+	$ let setFoo = \to. set(var:foo, value: to)
+	$ setFoo(to:4)
+	4
+	$ foo
+	4
+
+## Handling errors
+
+Most errors cancel execution of a command. However, if it's desirable to ignore an error, a `try` expression can be used to instead return `null` in case of an error.
+
+	$ let num = 4
+	$ let den = 0
+	$ num / den
+	error: ZeroDivisionError: division by zero
+	$ try 4/0
+	error: ZeroDivisionError: division by zero
+	null
+	$ 
 
 
 # AMQP Support

@@ -65,7 +65,10 @@ class Environment:
 
     def setVariable(self, name:str, value:Any) -> Cell:
         if name not in self.variables:
-            self.variables[name] = Cell(None)
+            if self.base and self.base.isVariable(name):
+                self.variables[name] = self.base.variables[name]
+            else:
+                self.variables[name] = Cell(None)
         self.variables[name].set(value)
         return self.variables[name]
 

@@ -1,7 +1,7 @@
 from typing import Any, Dict
 import os
 import re
-from .environment import Environment
+from .environment import Environment, Cell
 
 LeaderHelp = """
 REST Shell
@@ -88,6 +88,7 @@ def object(env:Environment, obj:Any) -> None:
     description = 'It has %s properties:\n' % len(properties)
 
     for param, value in properties.items():
+        value = value.value if isinstance(value, Cell) else value
         if service:
             description += '\t%s: %s\n' % \
                 ( param
@@ -118,6 +119,7 @@ def variable(env:Environment, keyword:str) -> None:
 
 
 def value(env:Environment, name:str, value:Any) -> None:
+    value = value.value if isinstance(value, Cell) else value
     typeStr = typeName(value)
 
     if typeStr != 'null':

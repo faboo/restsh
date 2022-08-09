@@ -35,26 +35,6 @@ class Production:
     def extend(self, *rules:Union['Production', Rule]) -> None:
         self.rules = self.rules + list(rules)
 
-    def lookAheadRule(self, recursed:List[Tuple['Production',int]], token:Union[Token, Eval], rule:Union['Production', Rule]) -> bool:
-        if isinstance(rule, Production):
-            return cast(Production, rule).lookAhead(recursed, token)
-        else:
-            ruleList = rule[1]
-
-            if not ruleList:
-                return True
-            elif isinstance(ruleList[0], type(Token)) and issubclass(ruleList[0], Token):
-                return isinstance(token, ruleList[0])
-            else:
-                return cast(Production, ruleList[0]).lookAhead(recursed, token)
-        
-
-    def lookAhead(self, recursed:List[Tuple['Production',int]], token:Union[Token, Eval]) -> bool:
-        for index in range(len(self.rules)):
-            rule = self.rules[index]
-            if self.lookAheadRule([(self, index), *recursed], token, rule):
-                return True
-        return False
 
     def parseRule(self,
             rule:Rule,
@@ -101,14 +81,10 @@ class Production:
             try:
                 if (self, index) in recursed:
                     continue
-                #if not self.lookAheadRule(recursed, stack[0], rule):
-                #    continue
 
                 if isinstance(rule, Production):
-                    #if rule.lookAhead(recursed):
                     matches.append(rule.parse(stack, [(self, index), *recursed], offset+1))
                 else:
-                    #if not rule[1] or rule[1][0] not in recursed:
                     matches.append(self.parseRule(rule, stack, [(self, index), *recursed], offset+1))
 
                 # If we ran out of tokens, this *is* the longest match
@@ -169,73 +145,6 @@ class Production:
 
     def __repr__(self) -> str:
         return 'Prod[%s]' % self.name if self.name else 'Prod[UNKNOWN]'
-
-
-def getStartSymbols(parser, knownStarts=None):
-    knownStarts = knownStarts or {}
-    startSymbols = []
-
-    for rule in parser.rules:
-        if isinstance(rule, Production):
-            start = rule
-        elif not rule[1]:
-            start = None
-        else:
-            start = rule[1][0]
-
-        if isinstance(start, Production):
-            if start.name not in knownStarts:
-                knownStarts[start.name] = []
-                knownStarts[start.name] = getStartSymbols(start, knownStarts)
-
-            startSymbols = startSymbols + knownStarts[start.name]
-
-        else:
-            startSymbols.append(start)
-
-    return startSymbols
-
-
-def getStartTable(parser, knownStarts=None):
-    knownStarts = knownStarts or {}
-    startTable = {}
-
-    for rule in parser.rules:
-        if isinstance(rule, Production):
-            for symbol, evls in getStartTable(rule, knownStarts).items():
-                if symbol not in startTable:
-                    startTable[symbol] = set()
-
-                startTable[symbol].update(evls)
-        else:
-            if not rule[1]:
-                start = None
-            else:
-                start = rule[1][0]
-
-            startSymbols = []
-
-            if isinstance(start, Production):
-                if start.name not in knownStarts:
-                    knownStarts[start.name] = []
-                    knownStarts[start.name] = getStartSymbols(start, knownStarts)
-
-                startSymbols = startSymbols + knownStarts[start.name]
-
-            else:
-                startSymbols.append(start)
-
-            for symbol in startSymbols:
-                if symbol not in startTable:
-                    startTable[symbol] = set()
-
-                startTable[symbol].add(rule[0])
-
-    return startTable
-
-    
-    
-    
 
 
 expression = Production(name='expression')
@@ -357,6 +266,7 @@ rvalue = Production(
 
 describe = Production(
     (Describe, [Help, expression]),
+    (Describe, [Help]),
     name='describe'
     )
 

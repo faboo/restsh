@@ -5,7 +5,7 @@ import sys
 import json
 from .environment import Environment, Cell
 from .evaluate import dereference, wrap, Eval, Builtin, Array, Function, ServiceObject, DictObject, String, Boolean \
-    , Integer, Null
+    , Integer, Float, Null
 from .repl import repLoop
 
 builtins:Dict[
@@ -131,6 +131,8 @@ def bInteger(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
             return Integer(0)
     elif isinstance(value, Boolean):
         return Integer(int(cast(Boolean, value).getValue()))
+    elif isinstance(value, Float):
+        return Integer(int(cast(Float, value).getValue()))
     else:
         return Integer(0)
 
