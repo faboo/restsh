@@ -45,14 +45,18 @@ def repLoop(environment:Environment) -> Eval:
                 tokens = []
                 #print('expression: %s' % exprs)
             except ParseError as ex:
+                terminal.setForeground(environment.output, 'red')
                 environment.print(
                     'parse error, expected one of: %s' % \
                     ', '.join([token.__name__ for token in set(ex.tokens)]))
+                terminal.reset(environment.output)
                 tokens = []
             except EndOfTokens:
                 #print('END OF TOKENS')
                 if previousTokens == tokens:
+                    terminal.setForeground(environment.output, 'red')
                     environment.print('parse error')
+                    terminal.reset(environment.output)
                     tokens = []
                 else:
                     continue

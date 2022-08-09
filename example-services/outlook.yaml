@@ -1,6 +1,5 @@
 ---
 protocol: https
-#host: graph.microsoft.com
 host: outlook.office.com
 authentication:
   type: bearer

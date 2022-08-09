@@ -58,9 +58,13 @@ Restsh supports four simple types:
 	* Like integers, but with a decimal point
 	
 		`12.5`
+
 		`007.0`
+
 		`-3.141592`
+
 		`+0.1`
+
 * booleans
 
 	* True and false:

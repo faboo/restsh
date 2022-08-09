@@ -83,19 +83,19 @@ class ElementList(Eval):
         self.elements:List[Eval] = elements
 
     def __repr__(self) -> str:
-        return ', '.join('%s' % repr(elm) for elm in self.elements)
+        return 'EL['+(', '.join('%s' % repr(elm) for elm in self.elements))+']'
 
     @staticmethod
-    def parse(elm:Eval=None, _:Comma=None, elmList:Union['ElementList',Eval]=None) -> Eval:
+    def parse(elmList:Union['ElementList',Eval]=None, _:Comma=None, elm:Eval=None) -> Eval:
         elements:List[Eval] = []
 
         if isinstance(elmList, ElementList):
             elements = list(elmList.elements)
         elif isinstance(elmList, Eval):
-            elements.insert(0, elmList)
+            elements.append(elmList)
 
         if isinstance(elm, Eval):
-            elements.insert(0, elm)
+            elements.append(elm)
 
         return ElementList(elements)
 
@@ -127,8 +127,11 @@ class Array(Eval):
         return [elm.toPython() for elm in self.elements]
 
     @staticmethod
-    def parse(_:LAngle, elements:ElementList, __:RAngle) -> Eval:
-        return Array(elements.elements)
+    def parse(_:LBracket, elements:ElementList, __:RBracket=None) -> Eval:
+        if isinstance(elements, RBracket):
+            return Array([])
+        else:
+            return Array(elements.elements)
 
     def isType(self, typeDesc:str) -> bool:
         return super().isType(typeDesc) or typeDesc.startswith('array') \
@@ -163,16 +166,16 @@ class ParamList(Eval):
         return ', '.join(self.params)
 
     @staticmethod
-    def parse(param:Sym=None, _:Comma=None, paramList:Union['ParamList',Sym]=None) -> Eval:
+    def parse(paramList:Union['ParamList',Sym], _:Comma=None, param:Sym=None) -> Eval:
         params:List[str] = []
 
         if isinstance(paramList, ParamList):
             params = list(paramList.params)
         elif isinstance(paramList, Sym):
-            params.insert(0, paramList.text)
+            params.append(paramList.text)
 
         if isinstance(param, Sym):
-            params.insert(0, param.text)
+            params.append(param.text)
 
         return ParamList(params)
 
@@ -230,8 +233,15 @@ class Closure(Function):
             )
 
     @staticmethod
-    def parse(_:BSlash, params:ParamList, __:Dot, expr:Eval) -> Eval:
-        return Closure(params.params, expr)
+    def parse(_:BSlash, *args) -> Eval:
+        if isinstance(args[0], ParamList):
+            params = args[0].params
+            expr = args[2]
+        else:
+            params = []
+            expr = args[1]
+
+        return Closure(params, expr)
 
     def evaluate(self, environment:Environment) -> Union[Eval, Cell]:
         if not self.evaluated:
@@ -332,11 +342,10 @@ class Block(Eval):
 
 class Arg(Eval):
     def __init__(self, param:str, arg:Eval) -> None:
-        self.param:str = param
-        self.arg:Eval = arg
+        self.args:Dict[str,Eval] = {param: arg}
 
     def __repr__(self) -> str:
-        return '%s: %s' % (self.param, repr(self.arg))
+        return 'ARG{%s}' % (self.args)
 
     @staticmethod
     def parse(param:Str, _:Colon, arg:Eval) -> Eval:
@@ -351,16 +360,11 @@ class ArgList(Eval):
         return ', '.join('%s: %s' % (key, repr(arg)) for key, arg in self.args.items())
 
     @staticmethod
-    def parse(arg:Arg=None, _:Comma=None, argList:Union['ArgList',Arg]=None) -> Eval:
-        args:Dict[str,Eval] = {}
-
-        if isinstance(argList, ArgList):
-            args = { **args, **argList.args }
-        elif isinstance(argList, Arg):
-            args[cast(Arg, args).param] = argList.arg
+    def parse(argList:Union['ArgList',Arg], _:Comma=None, arg:Arg=None) -> Eval:
+        args:Dict[str,Eval] = {**argList.args }
 
         if isinstance(arg, Arg):
-            args[arg.param] = arg.arg
+            args = {**args, **arg.args}
 
         return ArgList(args)
 
@@ -416,11 +420,16 @@ class DictObject(Object):
             }
 
     def __repr__(self) -> str:
-        return '{ %s\n}' % ', '.join('%s: %s\n' % (prop, repr(value)) for prop, value in self.properties.items())
+        return '{ %s}' % ', '.join('%s: %s\n' % (prop, repr(value)) for prop, value in self.properties.items())
 
     @staticmethod
-    def parse(_:LBrace, argList:ArgList, __:RBrace) -> Eval:
-        return DictObject(argList.args)
+    def parse(_:LBrace, *args) -> Eval:
+        if isinstance(args[0], ArgList):
+            argList = args[0].args
+        else:
+            argList = {}
+
+        return DictObject(argList)
 
     @staticmethod
     def fromPython(dct:dict) -> Eval:
@@ -735,8 +744,13 @@ class Call(Eval):
             )
 
     @staticmethod
-    def parse(func:Eval, _:LParen, args:ArgList, __:RParen) -> Eval:
-        return Call(func, args.args)
+    def parse(func:Eval, *args) -> Eval:
+        if isinstance(args[1], ArgList):
+            args = args[1].args
+        else:
+            args = { }
+
+        return Call(func, args)
 
     def evaluate(self, environment:Environment) -> Union[Eval, Cell]:
         args = \

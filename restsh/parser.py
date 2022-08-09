@@ -15,7 +15,7 @@ class ParseError(Exception):
         self.tokens = tokens
 
 
-Rule = Tuple[Type[Eval], List[Union['Production', Type[Token]]]]
+Rule = Tuple[Type[Eval], List[Union['Production', Type[Token], Type[Eval]]]]
 ParseStack = List[Union[Eval, Token]]
 
 class Production:
@@ -75,6 +75,8 @@ class Production:
             if isinstance(pat, Production):
                 result, stack = pat.parse(stack, recursed, offset+1)
             elif isinstance(stack[0], cast(Type[Any], pat)):
+                #if isinstance(stack[0], Eval):
+                    #print('Matched eval %s %s'% (stack[0], pat))
                 result = stack[0]
                 stack = stack[1:]
                 recursed = []
@@ -84,10 +86,11 @@ class Production:
 
             parsed.append(result)
 
+        #print('Parsing ', rule[0])
         return (rule[0].parse(*parsed), stack) #type:ignore
 
 
-    def parse(self, stack:ParseStack, recursed:List[Tuple['Production',int]], offset) -> Tuple[Eval, ParseStack]:
+    def parseRight(self, stack:ParseStack, recursed:List[Tuple['Production',int]], offset) -> Tuple[Eval, ParseStack]:
         eot = False
         error = []
         matches:List[Tuple[Eval, ParseStack]] = []
@@ -137,6 +140,27 @@ class Production:
 
         #print(' '*offset, '-> %s' % (longestMatch,))
         return cast(Tuple[Eval, ParseStack], longestMatch)
+
+
+    def parse(self, stack:ParseStack, recursed:List[Tuple['Production',int]], offset) -> Tuple[Eval, ParseStack]:
+        fullResult:Optional[Tuple[Eval, ParseStack]] = None
+        result:Optional[Eval] = None
+
+        try:
+            while stack:
+                #print('Parsing %s with stack %s' % (self, stack))
+                result, stack = self.parseRight(stack, recursed, offset)
+                fullResult = (result, list(stack))
+                #print('storing full result: ', fullResult)
+
+                stack.insert(0, result)
+                #print('%s read interim result %s (%s); reparsing: %s' % (self, result, result.__class__, stack))
+        except:
+            if not fullResult:
+                raise
+            #print(' -> %s returning fullResult %s' % (self, fullResult))
+
+        return fullResult
 
 
     def __repr__(self) -> str:
@@ -236,32 +260,32 @@ operator = Production(
 
 objectRef = Production(name='objectRef')
 objectRef.extend(
-    (ObjectRef, [variable, Dot, Sym]),
-    (ObjectRef, [expression, Dot, Sym]),
+    #(ObjectRef, [variable, Dot, Sym]),
+    (ObjectRef, [Eval, Dot, Sym]),
     )
 
 elementList = Production(name='elementList')
 elementList.extend(
-    (ElementList, [expression, Comma, elementList]),
+    (ElementList, [ElementList, Comma, expression]),
     (ElementList, [expression]),
-    (ElementList, []),
     )
 
 array = Production(
     (Array, [LBracket, elementList, RBracket]),
+    (Array, [LBracket, RBracket]),
     name='array'
     )
 
 
 paramList = Production(name='paramList')
 paramList.extend(
-    (ParamList, [Sym, Comma, paramList]),
+    (ParamList, [ParamList, Comma, Sym]),
     (ParamList, [Sym]),
-    (ParamList, []),
     )
 
 closure = Production(
     (Closure, [BSlash, paramList, Dot, expression]),
+    (Closure, [BSlash, Dot, expression]),
     name='closure'
     )
 
@@ -273,24 +297,24 @@ arg = Production(
 
 argList = Production(name='argList')
 argList.extend(
-    (ArgList, [arg, Comma, argList]),
+    (ArgList, [ArgList, Comma, arg]),
     (ArgList, [arg]),
-    (ArgList, []),
     )
 
 dictObject = Production(
     (DictObject, [LBrace, argList, RBrace]),
+    (DictObject, [LBrace, RBrace]),
     name='dictObject'
     )
 
 call = Production(
-    (Call, [variable, LParen, argList, RParen]),
-    (Call, [objectRef, LParen, argList, RParen]),
+    (Call, [expression, LParen, argList, RParen]),
+    (Call, [expression, LParen, RParen]),
     name='call'
     )
 
 opcall = Production(
-    (OpCall, [expression, operator, expression]),
+    (OpCall, [Eval, operator, expression]),
     name='opcall'
     )
 
@@ -300,7 +324,7 @@ tryex = Production(
     )
 
 subscript = Production(
-    (Subscript, [variable, LBracket, expression, RBracket]),
+    (Subscript, [Eval, LBracket, expression, RBracket]),
     name='subscript'
     )
 
@@ -352,7 +376,7 @@ assignment = Production(
 
 
 block = Production(
-    (Block, [expression, SemiColon, expression]),
+    (Block, [Eval, SemiColon, expression]),
     name='block'
     )
 
@@ -366,12 +390,12 @@ expression.extend(
     boolean,
     # Left recursive
     tryex,
-    objectRef,
     subscript,
     call,
     opcall,
     group,
     block,
+    objectRef,
     )
     
 
