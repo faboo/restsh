@@ -17,6 +17,7 @@ def setupArguments(args:list) -> argparse.Namespace:
         description='REST and RPC processing shell.')
     parser.add_argument('--environment', '-e', action='append', default=[])
     parser.add_argument('--skip-rc', '-s', action='store_true', default=False)
+    parser.add_argument('--ng-parser', action='store_true', default=False)
     parser.add_argument('script', nargs='?')
 
     return parser.parse_args()
@@ -47,18 +48,13 @@ def main(args:list=None):
     historyName = os.path.expanduser('~/.restsh_history')
     rcfile = os.path.expanduser('~/.restshrc')
 
-    #print('start symbols: %s' % set([token.__name__ for token in parser.getStartSymbols(parser.statement)]))
-    startTable = parser.getStartTable(parser.statement)
-    print('start symbols:\n%s' % '\n'.join(
-        [ token.__name__+': '+', '.join([evl.__name__ for evl in evls])
-          for token, evls in startTable.items()
-        ]))
-
     # ensure the history file exists
     with open(historyName, mode='a', encoding='utf-8') as history:
         print('', file=history)
 
     environment = Environment()
+
+    environment.ngParser = arguments.ng_parser
 
     environment.setVariable('__result', Null())
     environment.setVariable('null', Null())

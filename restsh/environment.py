@@ -1,6 +1,7 @@
 import sys
 from typing import Dict, Any, Optional, TextIO
 from .service import Service
+from . import terminal
 
 class EvaluationError(Exception):
     pass
@@ -31,6 +32,7 @@ class Environment:
         #print('environment: %s (base? %s)' % (id(self), base is not None))
         self.base = base
         self.loop:bool = True
+        self.ngParser:bool = False
         self.variables:Dict[str,Any] = {}
         self.services:Dict[str,Service] = {}
         self.lastError:Optional[Any] = None
@@ -44,7 +46,9 @@ class Environment:
         print(string, end=end, file=self.output)
 
     def error(self, string) -> None:
+        terminal.setForeground(self.output, 'red')
         self.print('error: %s' % string)
+        terminal.reset(self.output)
         self.lastError = string
         raise EvaluationError(string)
 

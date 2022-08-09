@@ -5,7 +5,8 @@ from . import terminal
 from .environment import Environment, EvaluationError, Cell
 from .token import Token
 from .reader import read, EndOfFile, UntokenizableError
-from .parser import parse, ParseError, EndOfTokens
+from .parser import parse, ParseError, EndOfTokens, statement
+from . import tableParser
 from .evaluate import Eval
 
 def printable(value:Eval) -> bool:
@@ -16,7 +17,13 @@ def printable(value:Eval) -> bool:
     
 
 def repLoop(environment:Environment) -> Eval:
+    parser = parse
     tokens:List[Token] = []
+
+    if environment.ngParser:
+        tparser = tableParser.Parser(statement)
+        tparser.printTransitionTable()
+        parser = tparser.parse
 
     while environment.loop:
         previousTokens = tokens
@@ -34,15 +41,16 @@ def repLoop(environment:Environment) -> Eval:
         if tokens:
             try:
                 #print('parsing')
-                exprs = parse(tokens)
+                exprs = parser(tokens)
                 tokens = []
                 #print('expression: %s' % exprs)
             except ParseError as ex:
                 environment.print(
                     'parse error, expected one of: %s' % \
                     ', '.join([token.__name__ for token in set(ex.tokens)]))
+                tokens = []
             except EndOfTokens:
-                print('END OF TOKENS')
+                #print('END OF TOKENS')
                 if previousTokens == tokens:
                     environment.print('parse error')
                     tokens = []
@@ -55,9 +63,9 @@ def repLoop(environment:Environment) -> Eval:
                 for expr in exprs:
                     result = expr.evaluate(environment)
                     if environment.output.isatty() and printable(expr):
-                        terminal.setForeground(environment, environment.getVariable('*resultcolor').value)
+                        terminal.setForeground(environment.output, environment.getVariable('*resultcolor').value)
                         environment.print('%s' % str(result))
-                        terminal.reset(environment)
+                        terminal.reset(environment.output)
                     environment.lastResult = result
             except EvaluationError:
                 pass

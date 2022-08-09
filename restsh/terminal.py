@@ -1,12 +1,12 @@
 import os
-from .environment import Environment
+import io
 
 def istty(func):
-    def wrap(environment:Environment, *args):
-        if not environment.output.isatty():
+    def wrap(output:io.IOBase, *args):
+        if not output.isatty():
             return
 
-        func(environment, *args)
+        func(output, *args)
 
     return wrap
             
@@ -41,17 +41,17 @@ class Background:
 
 
 @istty
-def reset(environment:Environment) -> None:
-    environment.output.write('\033[0m')
+def reset(output:io.IOBase) -> None:
+    output.write('\033[0m')
 
 
 @istty
-def setForeground(environment:Environment, string:str) -> None:
-    environment.output.write(getattr(Foreground, string))
+def setForeground(output:io.IOBase, string:str) -> None:
+    output.write(getattr(Foreground, string))
 
 
 @istty
-def setBackground(environment:Environment, string:str) -> None:
-    environment.output.write(getattr(Background, string))
+def setBackground(output:io.IOBase, string:str) -> None:
+    output.write(getattr(Background, string))
 
 

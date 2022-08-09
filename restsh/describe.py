@@ -82,7 +82,7 @@ def function(env:Environment, func:Any) -> None:
 
 def object(env:Environment, obj:Any) -> None:
     service = hasattr(obj, 'name') and obj.name in env.services
-    properties = env.services[obj.name].callDef \
+    properties = {**env.services[obj.name].callDef, **obj.methods} \
         if service \
         else obj.properties
     description = 'It has %s properties:\n' % len(properties)
@@ -109,7 +109,21 @@ def variable(env:Environment, keyword:str) -> None:
     if typeStr != 'null':
         typeStr = article(typeStr)
     
-    printWrapped(env, '%s is %s' % (keyword, typeStr))
+    printWrapped(env, '%s is %s\n' % (keyword, typeStr))
+
+    if typeStr == 'a function':
+        function(env, value)
+    elif typeStr == 'an object':
+        object(env, value)
+
+
+def value(env:Environment, name:str, value:Any) -> None:
+    typeStr = typeName(value)
+
+    if typeStr != 'null':
+        typeStr = article(typeStr)
+    
+    printWrapped(env, '%s is %s\n' % (name, typeStr))
 
     if typeStr == 'a function':
         function(env, value)

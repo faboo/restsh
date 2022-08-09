@@ -5,6 +5,7 @@ from .token import Sym, Eq, LParen, RParen, LAngle, RAngle, LBrace, RBrace, LBra
     , Str, Flt, Int, Let, Imp, Help, Ext, Try
 from .service import Service, UnsupportedProtocol
 from . import describe
+from . import terminal
 
 
 class Eval:
@@ -21,6 +22,9 @@ class Eval:
 
     def isType(self, typeDesc:str) -> bool:
         return typeDesc == 'any'
+
+    def getName(self) -> Optional[str]:
+        return None
 
     def toPython(self) -> Any:
         return repr(self)
@@ -63,6 +67,9 @@ class Variable(Eval):
     def __repr__(self) -> str:
         return self.name
 
+    def getName(self) -> Optional[str]:
+        return self.name
+
     @staticmethod
     def parse(sym:Sym) -> Eval:
         return Variable(sym.text)
@@ -96,6 +103,10 @@ class ElementList(Eval):
 class Object(Eval):
     def get(self, name:str, environment:Environment) -> Union[Eval, Cell]:
         return self
+
+    def isType(self, typeDesc:str) -> bool:
+        return super().isType(typeDesc) or typeDesc.startswith('object') \
+            or typeDesc.startswith('collection')
 
 
 class Array(Eval):
@@ -356,8 +367,8 @@ class ArgList(Eval):
 
 class ServiceObject(Object):
     def __init__(self, name:str) -> None:
-        self.calls:Dict[str,ServiceCall] = {}
         self.name:str = name
+        self.calls:Dict[str,ServiceCall] = {}
         self.methods:Dict[str,Builtin] = \
             { 'setHost': Builtin('setHost', self.setHost, {'host': 'string'})
             , 'setAuthentication': Builtin('setAuthentication', self.setAuthentication, {'auth': 'string'})
@@ -365,6 +376,9 @@ class ServiceObject(Object):
 
     def __repr__(self) -> str:
         return 'Service[%s]' % self.name
+
+    def getName(self) -> Optional[str]:
+        return self.name
 
     def setHost(self, environment:Environment, args:Dict[str, Union[Eval, Cell]]) -> Union[Eval, Cell]:
         host = cast(String, args['host'])
@@ -447,6 +461,11 @@ class ObjectRef(Eval):
 
     def __repr__(self) -> str:
         return '%s.%s' % (str(self.obj), self.referent)
+
+    def getName(self) -> Optional[str]:
+        objName = self.obj.getName()
+
+        return f'{objName}.{self.referent}' if objName else self.referent
 
     @staticmethod
     def parse(obj:Eval, _:Dot, referent:Sym) -> Eval:
@@ -641,27 +660,27 @@ class Import(Eval):
 
 
 class Describe(Eval):
-    def __init__(self, keyword:str=None) -> None:
-        self.keyword = keyword
+    def __init__(self, what:Eval=None) -> None:
+        self.what = what
 
     def __repr__(self) -> str:
-        return 'help %s' % self.keyword
+        return 'help %s' % self.what
 
     @property
     def interactivePrint(self) -> bool:
         return False
 
     @staticmethod
-    def parse(_:Help, keyword:Optional[Sym]=None) -> Eval:
-        return Describe(keyword.text if keyword else None)
+    def parse(_:Help, what:Optional[Union[Variable, ObjectRef]]=None) -> Eval:
+        return Describe(what)
 
     def evaluate(self, environment:Environment) -> Union[Eval, Cell]:
-        if self.keyword is None:
+        terminal.setForeground(environment.output, 'purple')
+        if self.what is None:
             describe.environment(environment)
-        elif environment.isVariable(self.keyword):
-            describe.variable(environment, self.keyword)
         else:
-            environment.error('%s is not defined' % self.keyword)
+            describe.value(environment, self.what.getName() or 'that', dereference(self.what.evaluate(environment)))
+        terminal.reset(environment.output)
 
         return self
 
@@ -755,7 +774,11 @@ class Call(Eval):
                         describe.typeName(args[param]))
                     ))
 
-        return cast(Function, func).call(environment, args)
+        try:
+            terminal.setForeground(environment.output, 'yellow')
+            return cast(Function, func).call(environment, args)
+        finally:
+            terminal.reset(environment.output)
 
 
 class OpCall(Call):

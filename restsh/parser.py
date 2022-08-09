@@ -252,6 +252,7 @@ array = Production(
     name='array'
     )
 
+
 paramList = Production(name='paramList')
 paramList.extend(
     (ParamList, [Sym, Comma, paramList]),
@@ -327,7 +328,8 @@ rvalue = Production(
     )
 
 describe = Production(
-    (Describe, [Help, Sym]),
+    (Describe, [Help, objectRef]),
+    (Describe, [Help, variable]),
     (Describe, [Help]),
     name='describe'
     )

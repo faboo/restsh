@@ -191,7 +191,7 @@ class HttpService(Service):
 
 class AmqpService(Service):
     def addAuth(self, auth:dict) -> None:
-        if self.authType == 'basic':
+        if self.authType == 'basic' and self.authData is not None:
             user, password = self.authData.split(':')
             auth['userid'] = user
             auth['password'] = password
@@ -207,7 +207,7 @@ class AmqpService(Service):
         queue = call.get('queue', None)
         responseType = call['response']['type']
         data = call.get('body', '')
-        connConf = {}
+        connConf:dict = {}
         text = ''
         result = ''
 
