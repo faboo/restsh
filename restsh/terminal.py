@@ -1,9 +1,10 @@
 import os
 import io
+import platform
 
 def istty(func):
     def wrap(output:io.IOBase, *args):
-        if not output.isatty():
+        if not output.isatty() or platform.system() == 'Windows':
             return
 
         func(output, *args)
