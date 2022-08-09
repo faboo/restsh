@@ -10,7 +10,7 @@ class EndOfTokens(Exception):
     pass
 
 class ParseError(Exception):
-    def __init__(self, tokens:List[Type[Token]]) -> None:
+    def __init__(self, tokens:List[Union[Type[Token], Type[Eval]]]) -> None:
         super().__init__()
         self.tokens = tokens
 
@@ -82,7 +82,7 @@ class Production:
                 recursed = []
                 #print('    %s' % stack)
             else:
-                raise ParseError([pat]) #TODO: include expected token etc.
+                raise ParseError([pat])
 
             parsed.append(result)
 
@@ -124,7 +124,7 @@ class Production:
             if eot:
                 raise EndOfTokens()
             
-            tokens:List[Type[Token]] = []
+            tokens:List[Union[Type[Token], Type[Eval]]] = []
 
             for err in error:
                 tokens = tokens + err.tokens
@@ -146,6 +146,10 @@ class Production:
         fullResult:Optional[Tuple[Eval, ParseStack]] = None
         result:Optional[Eval] = None
 
+        # This loop essentially implements a non-advancing transition, in the special case of left recursion (without a
+        # start symbol).
+        # It's a little clunky, but it works.
+
         try:
             while stack:
                 #print('Parsing %s with stack %s' % (self, stack))
@@ -160,7 +164,7 @@ class Production:
                 raise
             #print(' -> %s returning fullResult %s' % (self, fullResult))
 
-        return fullResult
+        return cast(Tuple[Eval, ParseStack], fullResult)
 
 
     def __repr__(self) -> str:
@@ -352,9 +356,7 @@ rvalue = Production(
     )
 
 describe = Production(
-    (Describe, [Help, objectRef]),
-    (Describe, [Help, variable]),
-    (Describe, [Help]),
+    (Describe, [Help, expression]),
     name='describe'
     )
 

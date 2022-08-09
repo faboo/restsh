@@ -745,12 +745,14 @@ class Call(Eval):
 
     @staticmethod
     def parse(func:Eval, *args) -> Eval:
-        if isinstance(args[1], ArgList):
-            args = args[1].args
-        else:
-            args = { }
+        argList:Dict[str, Eval]
 
-        return Call(func, args)
+        if isinstance(args[1], ArgList):
+            argList = args[1].args
+        else:
+            argList = { }
+
+        return Call(func, argList)
 
     def evaluate(self, environment:Environment) -> Union[Eval, Cell]:
         args = \
