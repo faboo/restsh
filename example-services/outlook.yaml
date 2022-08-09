@@ -14,3 +14,12 @@ call:
     response:
       type: json
 
+  - name: getMessages
+    params:
+      mboxId: string
+    path: /api/v2.0/users/$mboxId$/messages/
+    method: GET
+    response:
+      type: json
+      transform: |
+        response.value
