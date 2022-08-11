@@ -31,48 +31,51 @@ def repLoop(environment:Environment) -> Eval:
         exprs = []
 
         try:
-            tokens = read(environment, previousTokens)
-            #print('tokenized: %s' % tokens)
-        except EndOfFile:
-            environment.loop = False
-        except UntokenizableError as ex:
-            environment.print(ex.message)
-
-        if tokens:
             try:
-                #print('parsing')
-                exprs = parser(tokens)
-                tokens = []
-                #print('expression: %s' % exprs)
-            except ParseError as ex:
-                terminal.setForeground(environment.output, 'red')
-                environment.print(
-                    'parse error, expected one of: %s' % \
-                    ', '.join([token.__name__ for token in set(ex.tokens)]))
-                terminal.reset(environment.output)
-                tokens = []
-            except EndOfTokens:
-                #print('END OF TOKENS')
-                if previousTokens == tokens:
+                tokens = read(environment, previousTokens)
+                #print('tokenized: %s' % tokens)
+            except EndOfFile:
+                environment.loop = False
+            except UntokenizableError as ex:
+                environment.print(ex.message)
+
+            if tokens:
+                try:
+                    #print('parsing')
+                    exprs = parser(tokens)
+                    tokens = []
+                    #print('expression: %s' % exprs)
+                except ParseError as ex:
                     terminal.setForeground(environment.output, 'red')
-                    environment.print('parse error')
+                    environment.print(
+                        'parse error, expected one of: %s' % \
+                        ', '.join([token.__name__ for token in set(ex.tokens)]))
                     terminal.reset(environment.output)
                     tokens = []
-                else:
-                    continue
-        
-        if exprs:
-            try:
-                #print('expressions: %s' % exprs)
-                for expr in exprs:
-                    result = expr.evaluate(environment)
-                    if environment.output.isatty() and printable(expr):
-                        terminal.setForeground(environment.output, environment.getVariable('*resultcolor').value)
-                        environment.print('%s' % str(result))
+                except EndOfTokens:
+                    #print('END OF TOKENS')
+                    if previousTokens == tokens:
+                        terminal.setForeground(environment.output, 'red')
+                        environment.print('parse error')
                         terminal.reset(environment.output)
-                    environment.lastResult = result
-            except EvaluationError:
-                pass
+                        tokens = []
+                    else:
+                        continue
+            
+            if exprs:
+                try:
+                    #print('expressions: %s' % exprs)
+                    for expr in exprs:
+                        result = expr.evaluate(environment)
+                        if environment.output.isatty() and printable(expr):
+                            terminal.setForeground(environment.output, environment.getVariable('*resultcolor').value)
+                            environment.print('%s' % str(result))
+                            terminal.reset(environment.output)
+                        environment.lastResult = result
+                except EvaluationError:
+                    pass
+        except KeyboardInterrupt:
+            print('')
 
 
     return cast(Eval, environment.lastResult)
