@@ -47,7 +47,7 @@ def add(
 
 @add(
     'size',
-    {'of': 'collection'},
+    {'of': 'any'},
     'Returns the number of elements in an array, object, or string, or the number of parameters to a function')
 def bSize(environment:Environment, args:Dict[str,Eval]) -> Any:
     value = args['of']
@@ -60,6 +60,8 @@ def bSize(environment:Environment, args:Dict[str,Eval]) -> Any:
         return len(environment.services[cast(ServiceObject, value).name].callDef)
     elif isinstance(value, DictObject):
         return len(cast(DictObject, value).properties)
+    elif isinstance(value, String):
+        return len(cast(String, value).getValue())
     else:
         return environment.getVariable('null')
 
