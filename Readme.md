@@ -43,6 +43,7 @@ Restsh supports four simple types:
 		`"\"Learning programming,\" they said. \"It'll be fun,\" they said."`
 
 * integers
+
 	* Simple series of digits (in base 10), optionally starting with - or +
 
 		`12`
@@ -139,9 +140,126 @@ Most errors cancel execution of a command. However, if it's desirable to ignore 
 	null
 	$ 
 
+# Web Requests
 
-# AMQP Support
+Simple web requests can be made with the `http` object. `http`'s methods all take a complete URL, and return the text response of the request. On a non-2XX or 1XX response, an error is thrown with the status text of the response.
+
+	$ http.get(url:"http://www.example.com")
+	"<html><body><p>This domain is for use in illustrative examples in documents.</p></body></html>"
+	$ 
+
+For more complex requests, you will need to define a service.
+
+# Services
+
+Services are the heart of restsh. A service is an object with methods that make restful calls and return their result. Each service is defined by a YAML file. There are several examples included in the "example-services" directory.
+
+A service can be added to the session with the `import` command
+
+	$ import msgraph
+
+The `import` command adds the ".yaml" extension to the service name specified to create the filename where the service is defined. To open the file, restsh first looks in the current directory, and then in the ~/.restsh directory.
+
+After a service is imported, a new object with the service's name as added to the session. That object as a method for each call defined in its YAML file, plus the following predefined methods:
+
+* `setHost(host)` - Replaces the host and port defined in the service definition
+
+* `setAuthentication(auth)` - Sets or replaces the authentication data of the service. This persists between calls, but only is only used if the authentication type is set in the service definition.
+
+
+## Defining Services
+
+Service definitions are layed out as follows:
+
+	---
+	protocol: http|https|amqp
+	host: host & port
+	authentication:
+	  type: basic|bearer
+	  data: auth data string - for basic, separate user and password with a :
+	call:
+	  - name: method name
+	    timeout: call timeout in seconds; 60 second default
+	    params:
+	      method-param1: data type
+	      method-param2: data type
+	    body: text of the request body, if any
+	    response:
+	      type: json|text
+	      transform: restsh code
+	      error: restsh code
+	    # For http and https protocols:
+	    path: path portion of the URL
+	    query: query string portion of the URL	    
+	    fragment: hash string portion of the URL
+
+At the top-level, only `protocol`, `host`, and `call` are required. If the `authentication` section is omitted, no authentication will be done, even if you later call `setAuthentication` on the service object.
+
+The `call` section is a list of service call definitions. Here, only the `name` property of a call is truly required.
+
+The `params` section is a list of parameter names and types. The parameter names will be used for the service method's parameters, and as template variables for the text attributes of the call definition.
+
+The `body` section will be sent as the data of the request.
+
+For `http` and `https` requests, `path`, `query`, and `fragment` are combined with the `host` to create the URL to connect.
+
+The `response` section defines how to handle the service response. By default the full text of th response is returned as a string, but the `type` can be used to interpret the `json` as a restsh object instead. The `transform` section allows you to specify a restsh command whose result replaces the default response object as the call method's result. Similarly, the `error` section is a restsh command whose result, if `true`, causes the call method to throw an error rather than return a result.
+
+## Text Templates
+
+The following call attributes allow for template variables:
+
+* body
+* path
+* query
+* fragment
+
+Template variables are specified in text by surrounding any of the named call parameters in `$` characters. (To include a `$` in the text directly as `$$`.) The value of corresponding method argument will replace the template variable.
+
+Take the following call definition on a service called `userprofile`:
+
+	name: setDescription
+	path: /profile
+	method: PATCH
+	params:
+	  text: string
+	body: |
+	  { "description": "$text$"
+	  }
+
+This would be called from the shell like
+
+	$ import userprofile
+	$ userprofile.setDescription(text: "I love cats and rombic solids")
+	"updated!"
+	$
+
+This call would send a PATCH request with the body
+
+	{ "description": "I love cats and rombic solids"
+	}
+
+## Response Section
+
+### type
+
+The `type` attribute can be either `text`, in which case the response will be a string that is the entire response body, or `json` in which case the result will be parsed as JSON and the response type will depend on the content of the response itself.
+
+### transform
+
+The `transform` attribute is a restsh command. Within the transform command, every top level variable, function, and operator is available for use. In addition, the variable `response` is defined, containing the default service call response (dependant on the specified `type`).
+
+Services using the `http` and `https` protocols additionally provide `status`, containing the HTTP status code of the response, and `headers` an object containing the response headers.
+
+### error
+
+The `error` attribute functions much the same as the `transform` attribute. However, the `error` command must return either `true`, if the response should be considered failed, or `false` if it was successful.
+
+
+## AMQP Support
 
 Restsh uses the amqp package for AMQP 0-9 support. However, it is not a hard
 requirement. If you want to define AMQP-based services, you will need to
 pip-install amqp separately.
+
+Services using the `amqp` protocol only support `basic` authentication (or none).

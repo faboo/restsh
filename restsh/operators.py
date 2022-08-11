@@ -58,7 +58,7 @@ def bMultiply(left:int, right:int) -> int:
 
 
 @add('/', ('number', 'number'))
-def bDivide(left:int, right:int) -> int:
+def bDivide(left:Union[int,float], right:Union[int,float]) -> Union[int,float]:
     return left / right
 
 

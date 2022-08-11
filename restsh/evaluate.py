@@ -204,10 +204,12 @@ class Builtin(Function):
     def __init__(self,
             name:str,
             func:Callable[[Environment, Dict[str, Union[Eval, Cell]]], Union[Eval, Cell]],
-            params:Dict[str,str]) -> None:
+            params:Dict[str,str],
+            description:Optional[str]=None) -> None:
         self.name = name
         self.func = func
         self.params = params
+        self.description = description
 
     def __repr__(self) -> str:
         return 'builtin[%s]' % self.name

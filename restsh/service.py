@@ -121,11 +121,12 @@ class HttpService(Service):
 
 
     def call(self, name:str, arguments:dict) -> Any:
+        # TODO: headers?
         call = self.callDef[name]
         timeout = call['timeout']
         params = self.describe(name)
-        path = call.get('path', '/')
         method = call.get('method', 'GET')
+        path = call.get('path', '/')
         query = call.get('query', None)
         fragment = call.get('fragment', None)
         responseType = call['response']['type']
@@ -198,6 +199,7 @@ class AmqpService(Service):
 
 
     def call(self, name:str, arguments:dict) -> Any:
+        # TODO: add request and response headers
         import amqp #pylint: disable=import-outside-toplevel
         startTime = time.monotonic()
         replyQueue = 'REPLY_restsh_'+str(uuid.uuid1())
@@ -239,7 +241,7 @@ class AmqpService(Service):
                 if (time.monotonic() - startTime) > timeout:
                     raise Exception('Call timed out after %s seconds' % timeout)
 
-            print('response')
+            print('response\n', response)
             text = response.body.decode('utf-8')
 
             chan.close()

@@ -10,10 +10,18 @@ from .repl import repLoop
 
 builtins:Dict[
         str,
-        Tuple[ Callable[[Environment, Dict[str,Union[Eval, Cell]]], Union[Eval, Cell]], dict]
-        ] = { }
+        Tuple[
+            Callable[[Environment, Dict[str,Union[Eval, Cell]]], Union[Eval, Cell]],
+            dict,
+            Optional[str]
+        ]
+    ] = { }
 
-def add(name:str, args:Dict[str,str], retwrap:Optional[Callable[[Any], Union[Eval, Cell]]]=None
+def add(
+        name:str,
+        args:Dict[str,str],
+        desc:Optional[str]=None,
+        retwrap:Optional[Callable[[Any], Union[Eval, Cell]]]=None
         ) -> Any:
     def wrapper(func:Callable[[Any, Any], Any]
             ) -> Callable[[Environment, Dict[str,Union[Eval, Cell]]], Union[Eval, Cell]]:
@@ -30,21 +38,24 @@ def add(name:str, args:Dict[str,str], retwrap:Optional[Callable[[Any], Union[Eva
                 environment.error("%s: %s" % (ex.__class__.__name__, ' '.join(ex.args)))
                 return wrap(None)
 
-        builtins[name] = (run, args)
+        builtins[name] = (run, args, desc)
 
         return run
 
     return wrapper
 
 
-@add('size', {'of': 'collection'})
+@add(
+    'size',
+    {'of': 'collection'},
+    'Returns the number of elements in an array, object, or string, or the number of parameters to a function')
 def bSize(environment:Environment, args:Dict[str,Eval]) -> Any:
     value = args['of']
 
     if isinstance(value, Array):
         return len(cast(Array, value).elements)
     elif isinstance(value, Function):
-        return 1
+        return len(value.parameters(environment))
     elif isinstance(value, ServiceObject):
         return len(environment.services[cast(ServiceObject, value).name].callDef)
     elif isinstance(value, DictObject):
@@ -53,7 +64,7 @@ def bSize(environment:Environment, args:Dict[str,Eval]) -> Any:
         return environment.getVariable('null')
 
 
-@add('eval', {'code': 'string'})
+@add('eval', {'code': 'string'}, 'Evaluate a string as a restsh command')
 def bEval(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     value = args['code']
     env = Environment(environment)
@@ -98,7 +109,7 @@ def bFilter(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return Array(result)
 
 
-@add('string', {'value': 'any'})
+@add('string', {'value': 'any'}, 'Convert a value into a string')
 def bString(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     value = args['value']
 
@@ -175,7 +186,7 @@ def bSet(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eva
 
     return cell
 
-builtins['set'] = (bSet, {'var': 'any', 'value': 'any'})
+builtins['set'] = (bSet, {'var': 'any', 'value': 'any'}, 'Set or define a variable')
 
 @add('source', {'file': 'string'})
 def bSource(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
@@ -192,8 +203,8 @@ def bSource(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
 
 
 def register(environment:Environment):
-    for name, (builtin, params) in builtins.items():
+    for name, (builtin, params, description) in builtins.items():
         environment.setVariable(
             name,
-            Builtin(name, builtin, params))
+            Builtin(name, builtin, params, description))
 
