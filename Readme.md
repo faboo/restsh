@@ -1,4 +1,13 @@
-# Basics
+# About Restsh
+
+Restsh is a shell-like command interpreter for working with RESTful (or REST-esque) remote services.
+
+Often, when you're doing ad-hoc, exploratory, or emergency work with a service like that you're using curl, wget, or GUI interfaces, often in conjunction with some grepping, cutting, and pasting into new requests.
+
+But what if instead, you could treat those service calls like simple functions, and their results and arguments like the data that they *are*?
+
+Enter restsh, combining a shell-like experience for quick and dirty work, and a method for describing how a REST service works (parameter types and so on) so it can be used like a function. This allows you to easily combine, chain, repeat, and script different service calls.
+
 
 ## Sample Session
 
@@ -27,6 +36,13 @@ $ senders
 $ exit
 ```
 
+## Installation
+
+To install you can either use the provided install.sh script, or from the top of the source directory, simply:
+
+$ pip3 install .
+
+# Basics
 
 ## Types
 
@@ -95,21 +111,6 @@ It supports two compound types:
 While array elements and object properties may be modified, neither arrays nor
 objects may be extended or shrunk after creation.
 
-It also support custom functions, defined like this:
-
-	\foo, bar. foo + bar
-
-where the above is a function that takes two arguments, `foo` and `bar`, and returns their sum. You might call it like
-this:
-
-	$ let sum = \foo, bar. foo + bar
-	$ sum(foo: 5, bar: 3)
-	8
-	$ sum(bar: 3, foo: 5)
-	8
-
-Notice that the order of the arguments doesn't matter - just that they're named correctly. Built-in functions and service methods may also have specific type requirements for their arguments.
-
 ## Variables
 
 Variables are declared with `let`, and can be assigned values with `=`.
@@ -127,6 +128,25 @@ Assignment with `=` is a _statement_ and can only be used at the prompt or the t
 	$ foo
 	4
 
+## Functions
+
+Custom functions are defined like this:
+
+	\foo, bar. foo + bar
+
+where the above is a function that takes two arguments, `foo` and `bar`, and returns their sum. You might call it like
+this:
+
+	$ let sum = \foo, bar. foo + bar
+	$ sum(foo: 5, bar: 3)
+	8
+	$ sum(bar: 3, foo: 5)
+	8
+
+Notice that the order of the arguments doesn't matter - just that they're named correctly. Built-in functions and service methods may also have specific type requirements for their arguments.
+
+If you need to do more than one thing in a function, you can chain together expressions with `;`. The final expression will be result of the function.
+
 ## Handling errors
 
 Most errors cancel execution of a command. However, if it's desirable to ignore an error, a `try` expression can be used to instead return `null` in case of an error.
@@ -135,7 +155,7 @@ Most errors cancel execution of a command. However, if it's desirable to ignore 
 	$ let den = 0
 	$ num / den
 	error: ZeroDivisionError: division by zero
-	$ try 4/0
+	$ try num / den
 	error: ZeroDivisionError: division by zero
 	null
 	$ 
@@ -255,7 +275,6 @@ Services using the `http` and `https` protocols additionally provide `status`, c
 
 The `error` attribute functions much the same as the `transform` attribute. However, the `error` command must return either `true`, if the response should be considered failed, or `false` if it was successful.
 
-
 ## AMQP Support
 
 Restsh uses the amqp package for AMQP 0-9 support. However, it is not a hard
@@ -263,3 +282,9 @@ requirement. If you want to define AMQP-based services, you will need to
 pip-install amqp separately.
 
 Services using the `amqp` protocol only support `basic` authentication (or none).
+
+# Scripting
+
+On startup, restsh will look for a file named `~/.restshrc` and run all of the commands there before the first prompt. Additionally, you can direct restsh to run other script files before first prompt with the `--environment` command-line argument.
+
+If other files are provided on the command-line, they will be run in order and then the interpreter will exit. This can be combined with `--environment` arguments.
