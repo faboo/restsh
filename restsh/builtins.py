@@ -2,6 +2,7 @@ from typing import cast, Union, Dict, Callable, Tuple, List, Optional, Any
 import io
 import os
 import sys
+import re
 import json
 from .environment import Environment, Cell
 from .evaluate import dereference, wrap, Eval, Builtin, Array, Function, ServiceObject, DictObject, String, Boolean \
@@ -79,7 +80,7 @@ def bEval(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return repLoop(env)
     
 
-@add('map', {'arr': 'array', 'fn': 'function(arr,fn)'})
+@add('map', {'arr': 'array', 'fn': 'function[item,index]'})
 def bMap(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     array = cast(Array, args['arr'])
     func = cast(Function, args['fn'])
@@ -94,7 +95,7 @@ def bMap(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return Array(result)
 
 
-@add('filter', {'arr': 'array', 'fn': 'function(arr,fn)'})
+@add('filter', {'arr': 'array', 'fn': 'function[item,index]'})
 def bFilter(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     array = cast(Array, args['arr'])
     func = cast(Function, args['fn'])
@@ -109,6 +110,46 @@ def bFilter(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
         index += 1
 
     return Array(result)
+
+
+@add('reduce', {'arr': 'array', 'fn': 'function[accum,item,index]'})
+def bReduce(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+    array = cast(Array, args['arr'])
+    func = cast(Function, args['fn'])
+    accum:Union[Eval,Cell] = args['base']
+    index = 0
+
+    for item in array.elements:
+        accum = func.call(
+            environment,
+            { 'accum': dereference(accum)
+            , 'item': dereference(item)
+            , 'index': wrap(index)
+            })
+
+        index += 1
+    
+    return accum
+
+
+@add('rreduce', {'arr': 'array', 'fn': 'function[accum,item,index]'})
+def bRreduce(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+    array = cast(Array, args['arr'])
+    func = cast(Function, args['fn'])
+    accum:Union[Eval,Cell] = args['base']
+    index = 0
+
+    for item in reversed(array.elements):
+        accum = func.call(
+            environment,
+            { 'accum': dereference(accum)
+            , 'item': dereference(item)
+            , 'index': wrap(index)
+            })
+
+        index += 1
+    
+    return accum
 
 
 @add('string', {'value': 'any'}, 'Convert a value into a string')
@@ -161,6 +202,22 @@ def bSh(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     except Exception as ex:
         environment.error(str(ex))
         return Null()
+
+
+@add('grep', {'text': 'string', 'for': 'string'})
+def bGrep(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+    text = cast(String, args['text']).getValue()
+    forStr = cast(String, args['for']).getValue()
+
+    return Boolean(re.search(forStr, text) is not None)
+
+
+@add('split', {'text': 'string', 'on': 'string'})
+def bSplit(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+    text = cast(String, args['text']).getValue()
+    onStr = cast(String, args['on']).getValue()
+
+    return Array([String(string) for string in re.split(onStr, text)])
 
 
 @add('tojson', {'val': 'any'})

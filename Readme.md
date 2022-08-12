@@ -257,7 +257,7 @@ The following call attributes allow for template variables:
 * query
 * fragment
 
-Template variables are specified in text by surrounding any of the named call parameters in `$` characters. (To include a `$` in the text directly as `$$`.) The value of corresponding method argument will replace the template variable.
+Template variables are specified in text by surrounding any of the named call parameters in `$` characters. (To include a `$` in the text directly use `$$`.) The value of corresponding method argument will replace the template variable.
 
 Take the following call definition on a service called `userprofile`:
 

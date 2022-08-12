@@ -249,7 +249,7 @@ group = Production(
 
 define = Production(
     (Define, [Let, variable]),
-    name='define'
+    name='let'
     )
 
 lvalue = Production(
@@ -267,7 +267,7 @@ rvalue = Production(
 describe = Production(
     (Describe, [Help, expression]),
     (Describe, [Help]),
-    name='describe'
+    name='help'
     )
 
 ext = Production(
@@ -326,8 +326,11 @@ def parse(tokens:List[Token]) -> List[Eval]:
     results = []
     stack = cast(ParseStack, tokens)
 
-    while stack:
-        result, stack = statement.parse(stack, [], 0)
-        results.append(result)
+    result, stack = statement.parse(stack, [], 0)
+
+    if stack:
+        raise ParseError([])
+
+    results.append(result)
 
     return results
