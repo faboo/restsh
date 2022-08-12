@@ -6,7 +6,7 @@ Often, when you're doing ad-hoc, exploratory, or emergency work with a service l
 
 But what if instead, you could treat those service calls like simple functions, and their results and arguments like the data that they *are*?
 
-Enter restsh, combining a shell-like experience for quick and dirty work, and a method for describing how a REST service works (parameter types and so on) so it can be used like a function. This allows you to easily combine, chain, repeat, and script different service calls.
+Enter restsh, combining a shell-like experience for quick and dirty work, and a method for describing how a REST service works (parameter types and so on) so it can be used like a set of functions. This allows you to easily combine, chain, repeat, and script different service calls.
 
 
 ## Sample Session
@@ -40,7 +40,7 @@ $ exit
 
 To install you can either use the provided install.sh script, or from the top of the source directory, simply:
 
-$ pip3 install .
+	$ pip3 install .
 
 # Basics
 
@@ -56,7 +56,7 @@ Restsh supports four simple types:
 	
 	* Double quotes inside a string can be escaped with a `\`
 	
-		`"\"Learning programming,\" they said. \"It'll be fun,\" they said."`
+		`"\"Learn programming,\" they said. \"It'll be fun,\" they said."`
 
 * integers
 
@@ -180,11 +180,11 @@ A service can be added to the session with the `import` command
 
 The `import` command adds the ".yaml" extension to the service name specified to create the filename where the service is defined. To open the file, restsh first looks in the current directory, and then in the ~/.restsh directory.
 
-After a service is imported, a new object with the service's name as added to the session. That object as a method for each call defined in its YAML file, plus the following predefined methods:
+After a service is imported, a new object with the service's name as added to the session. That object has a method for each call defined in its YAML file, plus the following predefined methods:
 
 * `setHost(host)` - Replaces the host and port defined in the service definition
 
-* `setAuthentication(auth)` - Sets or replaces the authentication data of the service. This persists between calls, but only is only used if the authentication type is set in the service definition.
+* `setAuthentication(auth)` - Sets or replaces the authentication data of the service. This persists between calls, but is only used if the authentication type is set in the service definition.
 
 
 ## Defining Services
@@ -224,6 +224,29 @@ The `body` section will be sent as the data of the request.
 For `http` and `https` requests, `path`, `query`, and `fragment` are combined with the `host` to create the URL to connect.
 
 The `response` section defines how to handle the service response. By default the full text of th response is returned as a string, but the `type` can be used to interpret the `json` as a restsh object instead. The `transform` section allows you to specify a restsh command whose result replaces the default response object as the call method's result. Similarly, the `error` section is a restsh command whose result, if `true`, causes the call method to throw an error rather than return a result.
+
+## Parameter Data Types
+
+The following type names map directly to types described above:
+
+* string
+* integer
+* float
+* boolean
+* array
+* object
+* function
+
+In addition, the following meta types meta-types can be used:
+
+* any
+  * Any value at all
+* number
+  * Either an integer or a float
+* collection
+  * Either an array or an object
+
+The array, collection, object, and function types may be specified with further descriptors in brackets, such as `array[integer]` to denote an array of integers. These descriptors are only informational and not currently enforced by the type checker.
 
 ## Text Templates
 

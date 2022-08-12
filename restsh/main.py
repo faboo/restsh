@@ -1,4 +1,3 @@
-#pylint: disable=invalid-name
 import argparse
 import sys
 import os
