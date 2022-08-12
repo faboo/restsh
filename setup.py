@@ -20,7 +20,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "restsh = restsh.main:main"
+            "restsh = restsh.__main__:main"
         ]
     },
 )
