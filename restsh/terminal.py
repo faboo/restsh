@@ -56,3 +56,6 @@ def setBackground(output:io.IOBase, string:str) -> None:
     output.write(getattr(Background, string))
 
 
+@istty
+def setTitle(output:io.IOBase, title:str) -> None:
+    output.write(f'\033]0;{title}\a')

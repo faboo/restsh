@@ -30,6 +30,8 @@ def repLoop(environment:Environment) -> Eval:
         tokens = []
         exprs = []
 
+        terminal.setTitle(environment.output, 'restsh')
+
         try:
             try:
                 tokens = read(environment, previousTokens)
@@ -66,6 +68,7 @@ def repLoop(environment:Environment) -> Eval:
                 try:
                     #print('expressions: %s' % exprs)
                     for expr in exprs:
+                        terminal.setTitle(environment.output, repr(expr)[:30])
                         result = expr.evaluate(environment)
                         if environment.output.isatty() and printable(expr):
                             terminal.setForeground(environment.output, environment.getVariable('*resultcolor').value)

@@ -4,6 +4,7 @@ import os
 import sys
 import re
 import json
+import base64
 from .environment import Environment, Cell
 from .evaluate import dereference, wrap, Eval, Builtin, Array, Function, ServiceObject, DictObject, String, Boolean \
     , Integer, Float, Null
@@ -204,7 +205,7 @@ def bSh(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
         return Null()
 
 
-@add('grep', {'text': 'string', 'for': 'string'})
+@add('grep', {'text': 'string', 'for': 'string'}, 'Search text for a regular expression')
 def bGrep(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     text = cast(String, args['text']).getValue()
     forStr = cast(String, args['for']).getValue()
@@ -212,7 +213,7 @@ def bGrep(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return Boolean(re.search(forStr, text) is not None)
 
 
-@add('split', {'text': 'string', 'on': 'string'})
+@add('split', {'text': 'string', 'on': 'string'}, 'Split a string on a regular expression')
 def bSplit(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     text = cast(String, args['text']).getValue()
     onStr = cast(String, args['on']).getValue()
@@ -230,6 +231,19 @@ def bTojson(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
 def bParsejson(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     string = cast(String, args['str']).getValue()
     return wrap(json.loads(string))
+
+
+@add('b64encode', {'text': 'string'}, 'Encode a string as base-64')
+def bB64encode(environment:Environment, args:Dict[str,Eval]) -> Any:
+    string = cast(String, args['text']).getValue()
+    return base64.b64encode(string.encode('utf-8')).decode('utf-8')
+
+
+@add('b64decode', {'b64': 'string'}, 'Decode a base-64 as a string')
+def bB64decode(environment:Environment, args:Dict[str,Eval]) -> Any:
+    b64 = cast(String, args['b64']).getValue()
+    return base64.b64decode(b64).decode('utf-8')
+    
 
 
 def bSet(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
