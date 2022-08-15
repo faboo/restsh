@@ -77,6 +77,13 @@ def repLoop(environment:Environment) -> Eval:
                         environment.lastResult = result
                 except EvaluationError:
                     pass
+                except Exception as ex:
+                    terminal.setForeground(environment.output, environment.getVariable('*resultcolor').value)
+                    environment.print('INTERNAL INTERPRETER ERROR: %s' % str(ex))
+                    terminal.reset(environment.output)
+                    if environment.debugErrors:
+                        raise
+                    
         except KeyboardInterrupt:
             print('')
 

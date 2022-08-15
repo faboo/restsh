@@ -1,5 +1,6 @@
 from typing import cast, Union, Dict, Callable, Tuple, List, Optional, Any
 from urllib import request
+from urllib.error import HTTPError
 from .environment import Environment, Cell
 from .evaluate import dereference, wrap, DictObject, Builtin, String, Eval
 
@@ -16,10 +17,16 @@ def bRequest(environment:Environment, method:str, url:str, data:Optional[str]) -
 
     print('request:\n', req.__dict__)
 
-    with request.urlopen(req) as response:
-        status = response.status
-        reason = response.reason
-        text = response.read().decode('utf-8')
+    try:
+        with request.urlopen(req) as response:
+            status = response.status
+            reason = response.reason
+            text = response.read().decode('utf-8')
+    except HTTPError as ex:
+        status = ex.status
+        reason = ex.reason
+        text = ex.read().decode('utf-8')
+        print(text)
 
     status = status // 100
     

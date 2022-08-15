@@ -181,6 +181,9 @@ class ParamList(Eval):
 
 
 class Function(Object):
+    def __init__(self) -> None:
+        self.description:Optional[str] = None
+
     def get(self, name:str, environment:Environment) -> Union[Eval, Cell]:
         result = self
         if name == 'parameters':
@@ -206,6 +209,7 @@ class Builtin(Function):
             func:Callable[[Environment, Dict[str, Union[Eval, Cell]]], Union[Eval, Cell]],
             params:Dict[str,str],
             description:Optional[str]=None) -> None:
+        super().__init__()
         self.name = name
         self.func = func
         self.params = params
@@ -223,6 +227,7 @@ class Builtin(Function):
 
 class Closure(Function):
     def __init__(self, params:List[str], expr:Eval) -> None:
+        super().__init__()
         self.params:List[str] = params
         self.expression:Eval = expr
         self.environment:Optional[Environment] = None
@@ -267,6 +272,7 @@ class Closure(Function):
 
 class ServiceCall(Function):
     def __init__(self, service:str, call:str) -> None:
+        super().__init__()
         self.service:str = service
         self.name:str = call
 

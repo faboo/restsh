@@ -17,6 +17,7 @@ def setupArguments(args:list) -> argparse.Namespace:
     parser.add_argument('--environment', '-e', action='append', default=[])
     parser.add_argument('--skip-rc', '-s', action='store_true', default=False)
     parser.add_argument('--ng-parser', action='store_true', default=False)
+    parser.add_argument('--debug-errors', action='store_true', default=False)
     parser.add_argument('--version', action='store_true', default=False)
     parser.add_argument('script', nargs='?')
 
@@ -62,6 +63,7 @@ def main(args:list=None):
     environment = Environment()
 
     environment.ngParser = arguments.ng_parser
+    environment.debugErrors = arguments.debug_errors
 
     environment.setVariable('__result', Null())
     environment.setVariable('null', Null())

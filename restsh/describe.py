@@ -73,7 +73,7 @@ def typeName(variable:Any) -> str:
 def function(env:Environment, func:Any) -> None:
     params:Dict[str,str] = func.parameters(env)
     description = \
-        (func.description+'\n\n' if hasattr(func, 'description') else '') \
+        (func.description+'\n\n' if func.description else '') \
         + 'It takes %s arguments:\n' % len(params)
 
     for param, ptype in params.items():

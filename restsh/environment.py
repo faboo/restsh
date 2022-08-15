@@ -33,6 +33,7 @@ class Environment:
         self.base = base
         self.loop:bool = True
         self.ngParser:bool = False
+        self.debugErrors:bool = False
         self.variables:Dict[str,Any] = {}
         self.services:Dict[str,Service] = {}
         self.lastError:Optional[Any] = None
