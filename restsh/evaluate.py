@@ -777,24 +777,32 @@ class Call(Eval):
         params = cast(Function, func).parameters(environment)
 
         for param in params:
+            ptype = params[param]
+            optional = ptype[0] == '?'
+
+            if optional:
+                ptype = ptype[1:]
+
             if param not in args:
-                environment.error('Missing argument %s should be %s' % \
-                    ( param
-                    , describe.article(params[param])
-                    ))
+                if not optional:
+                    environment.error('Missing argument: `%s` should be %s' % \
+                        ( param
+                        , describe.article(params[param])
+                        ))
+
             if params[param] == 'cell':
                 if not isinstance(args[param], Cell):
-                    environment.error('Parameter %s should be a variable or other cell not %s, %s' % \
+                    environment.error('Parameter `%s` should be a variable or other cell not %s, %s' % \
                         ( param
                         , args[param]
                         , describe.article(
                             describe.typeName(args[param]))
                         ))
                     
-            elif not dereference(args[param]).isType(params[param]):
-                environment.error('Parameter %s should be %s not %s, %s' % \
+            elif param in args and not dereference(args[param]).isType(ptype):
+                environment.error('Parameter `%s` should be %s not %s, %s' % \
                     ( param
-                    , describe.article(params[param])
+                    , describe.article(ptype)
                     , args[param]
                     , describe.article(
                         describe.typeName(args[param]))

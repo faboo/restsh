@@ -205,12 +205,17 @@ def bSh(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
         return Null()
 
 
-@add('grep', {'text': 'string', 'for': 'string'}, 'Search text for a regular expression')
+@add('grep', {'text': 'string', 'for': 'string', 'case': '?boolean'}, 'Search text for a regular expression')
 def bGrep(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     text = cast(String, args['text']).getValue()
     forStr = cast(String, args['for']).getValue()
+    caseIns = args.get('case')
+    regexargs = {}
 
-    return Boolean(re.search(forStr, text) is not None)
+    if caseIns is None or cast(Boolean, caseIns).getValue() is False:
+        regexargs = { 'flags': re.IGNORECASE }
+
+    return Boolean(re.search(forStr, text, **regexargs) is not None)
 
 
 @add('split', {'text': 'string', 'on': 'string'}, 'Split a string on a regular expression')
