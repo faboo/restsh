@@ -14,4 +14,11 @@ call:
       transform: |
         response.value
 
+  - name: users
+    path: /beta/users?$top=999
+    method: GET
+    response:
+      type: json
+      transform: |
+        response.value
 

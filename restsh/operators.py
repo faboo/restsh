@@ -42,6 +42,11 @@ def bEqual(environment:Environment, args:Dict[str,Union[Cell, Eval]]) -> Union[E
 operators['=='] = (bEqual, ('any', 'any'))
 
 
+def bNotEqual(environment:Environment, args:Dict[str,Union[Cell, Eval]]) -> Union[Eval, Cell]:
+    return Boolean(not dereference(args['left']).equal(dereference(args['right'])))
+operators['!='] = (bEqual, ('any', 'any'))
+
+
 @add('+', ('number', 'number'))
 def bAdd(left:int, right:int) -> int:
     return left + right

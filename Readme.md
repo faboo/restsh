@@ -186,6 +186,8 @@ After a service is imported, a new object with the service's name as added to th
 
 * `setAuthentication(auth)` - Sets or replaces the authentication data of the service. This persists between calls, but is only used if the authentication type is set in the service definition.
 
+NOTE: A service may be *reimported*, in which case its yaml description is reevulated, allowing you to make changes or add new calls during a session. Changes to the host or authentication will be reset.
+
 
 ## Defining Services
 

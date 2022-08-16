@@ -187,7 +187,7 @@ class Function(Object):
     def get(self, name:str, environment:Environment) -> Union[Eval, Cell]:
         result = self
         if name == 'parameters':
-            result = self
+            result = wrap(self.parameters(environment))
         else:
             environment.error('%s has no member %s' % (self, name))
 
@@ -468,6 +468,8 @@ class DictObject(Object):
         return obj
 
     def get(self, name:str, environment:Environment) -> Union[Eval, Cell]:
+        if name not in self.properties:
+            environment.error(f'Object has no property \'{name}\'')
         return self.properties[name]
 
 
