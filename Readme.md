@@ -139,8 +139,6 @@ The if/then/else expression can be used to make choices.
 	$ let f = 2
 	$ if 2 - f then 1 else 3
 	3
-	$ let gg = \v: if v < 4 then "low" else "high"
-	parse error, expected one of: 
 	$ let gg = \v. if v < 4 then "low" else "high"
 	$ gg(v:3)
 	low
