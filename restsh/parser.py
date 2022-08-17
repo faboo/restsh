@@ -1,10 +1,10 @@
 from typing import cast, List, Tuple, Type, Union, Any, Optional
 from .token import Token, Sym, Op, Eq, Dot, LParen, RParen, LBrace, RBrace, LBracket, RBracket \
     , Comma, Colon, SemiColon, Bang, BSlash \
-    , Let, Imp, Help, Ext, Try, Str, Flt, Int
+    , If, Then, Else, Let, Imp, Help, Ext, Try, Str, Flt, Int
 from .evaluate import Eval, Variable, ObjectRef, Define, Float, Integer, String, Array, Assignment, Import \
     , Arg, ArgList, Call, OpCall, ElementList, DictObject, Subscript, Not, ParamList, Closure \
-    , Describe, Exit, TryException, Group, Block
+    , IfThen, Describe, Exit, TryException, Group, Block
 
 class EndOfTokens(Exception):
     pass
@@ -247,6 +247,11 @@ group = Production(
     name='group'
     )
 
+ifthen = Production(
+    (IfThen, [If, expression, Then, expression, Else, expression]),
+    name='ifthen'
+    )
+
 define = Production(
     (Define, [Let, variable]),
     name='let'
@@ -302,6 +307,7 @@ expression.extend(
     boolean,
     # Left recursive
     tryex,
+    ifthen,
     subscript,
     call,
     opcall,

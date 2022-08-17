@@ -48,6 +48,12 @@ class Ext(Token): pass
 
 class Try(Token): pass
 
+class If(Token): pass
+
+class Then(Token): pass
+
+class Else(Token): pass
+
 class Sym(Token): pass
 
 class Op(Token): pass
@@ -79,6 +85,9 @@ tokens:List[Tuple[Type[Token], re.Pattern]] = \
     , (Ext, re.compile(r'exit\b'))
     , (Try, re.compile(r'try\b'))
 
+    , (If, re.compile(r'if\b'))
+    , (Then, re.compile(r'then\b'))
+    , (Else, re.compile(r'else\b'))
 
     , (Sym, re.compile('[_a-zA-Z][_a-zA-Z0-9]*'))
     , (Op, re.compile('[-+*/|&^$@?~=<>]+'))

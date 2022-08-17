@@ -2,7 +2,7 @@ from typing import cast, Union, Dict, Any, List, Callable, Optional
 from .environment import Environment, Cell, EvaluationError
 from .token import Sym, Eq, LParen, RParen, LAngle, RAngle, LBrace, RBrace, LBracket, RBracket \
     , Comma, Colon, SemiColon, Bang, Dot, BSlash \
-    , Str, Flt, Int, Let, Imp, Help, Ext, Try
+    , Str, Flt, Int, If, Then, Else, Let, Imp, Help, Ext, Try
 from .service import Service, UnsupportedProtocol
 from . import describe
 from . import terminal
@@ -185,7 +185,7 @@ class Function(Object):
         self.description:Optional[str] = None
 
     def get(self, name:str, environment:Environment) -> Union[Eval, Cell]:
-        result = self
+        result:Eval = self
         if name == 'parameters':
             result = wrap(self.parameters(environment))
         else:
@@ -616,6 +616,8 @@ class Boolean(Constant):
             result = expr
         elif isinstance(expr, Integer):
             result = Boolean(expr.getValue() != 0)
+        elif isinstance(expr, Float):
+            result = Boolean(expr.getValue() != 0.0)
         elif isinstance(expr, Array):
             result = Boolean(len(expr.elements) != 0)
         else:
@@ -625,6 +627,29 @@ class Boolean(Constant):
 
     def isType(self, typeDesc:str) -> bool:
         return super().isType(typeDesc) or typeDesc == 'boolean'
+
+
+class IfThen(Eval):
+    def __init__(self, ifp:Eval, thendo:Eval, elsedo:Eval) -> None:
+        super().__init__()
+        self.ifp = ifp
+        self.thendo = thendo
+        self.elsedo = elsedo
+
+    @staticmethod
+    def parse(_:If, ifp:Eval, __:Then, thendo:Eval, ___:Else, elsedo:Eval) -> Eval:
+        return IfThen(ifp, thendo, elsedo)
+
+
+    def evaluate(self, environment:Environment) -> Union[Eval,Cell]:
+        pred = self.ifp.evaluate(environment)
+
+        if Boolean.truthy(pred).getValue():
+            result = self.thendo.evaluate(environment)
+        else:
+            result = self.elsedo.evaluate(environment)
+
+        return result
 
 
 class Assignment(Eval):

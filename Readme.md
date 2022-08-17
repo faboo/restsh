@@ -128,6 +128,55 @@ Assignment with `=` is a _statement_ and can only be used at the prompt or the t
 	$ foo
 	4
 
+## Selection (if/then)
+
+The if/then/else expression can be used to make choices.
+
+	$ if true then 1 else 2
+	1
+	$ if false then 1 else 2
+	2
+	$ let f = 2
+	$ if 2 - f then 1 else 3
+	3
+	$ let gg = \v: if v < 4 then "low" else "high"
+	parse error, expected one of: 
+	$ let gg = \v. if v < 4 then "low" else "high"
+	$ gg(v:3)
+	low
+	$ gg(v:6)
+	high
+	$ 
+
+If the `if` part of the expression is "truthy", then the `then` part is evaluated and is the result of the expression. Otherwise, the `else` portion is evaluated as the result.
+
+### Truthiness
+
+The following values are considered "true":
+
+* `true`
+
+* Non-zero integers
+
+* Non-zero floats
+
+* Arrays of non-zero size
+
+* All other values except `null`
+
+Values considered "false":
+
+* `false`
+
+* `0`
+
+* `0.0`
+
+* Arrays of size 0
+
+* `null`
+
+
 ## Functions
 
 Custom functions are defined like this:
