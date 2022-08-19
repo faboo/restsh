@@ -44,7 +44,7 @@ To install you can either use the provided install.sh script, or from the top of
 
 ## But WHY Though?
 
-I here what you're saying, "This is all written in Python. Can't you just write Python scripts instead?" and yes, you could. And if you're going to be writing anything permanent, you absolute should.
+I hear what you're saying, "This is all written in Python. Can't you just write Python scripts instead?" and yes, you could. And if you're going to be writing anything permanent, you absolute should.
 
 However, Restsh aims to be a pleasant, helpful environment for when you want to experiment, or need to get something oddly specific done fast.
 
@@ -198,7 +198,7 @@ this:
 
 Notice that the order of the arguments doesn't matter - just that they're named correctly. Built-in functions and service methods may also have specific type requirements for their arguments.
 
-If you need to do more than one thing in a function, you can chain together expressions with `;`. The final expression will be result of the function.
+If you need to do more than one thing in a function, you can chain together expressions with `;`. The final expression will be the result of the function.
 
 ## Handling errors
 
@@ -250,14 +250,17 @@ Service definitions are layed out as follows:
 	protocol: http|https|amqp
 	host: host & port
 	authentication:
-	  type: basic|bearer
-	  data: auth data string - for basic, separate user and password with a :
+	  type: basic|bearer|cookie|etc
+	  data: auth data string
 	call:
 	  - name: method name
 	    timeout: call timeout in seconds; 60 second default
 	    params:
 	      method-param1: data type
 	      method-param2: data type
+	    headers:
+	      protocol-header-1: value  
+	      protocol-header-2: value  
 	    body: text of the request body, if any
 	    response:
 	      type: json|text
@@ -274,11 +277,23 @@ The `call` section is a list of service call definitions. Here, only the `name` 
 
 The `params` section is a list of parameter names and types. The parameter names will be used for the service method's parameters, and as template variables for the text attributes of the call definition.
 
-The `body` section will be sent as the data of the request.
+The `body` section is text that will be sent as the data of the request.
 
-For `http` and `https` requests, `path`, `query`, and `fragment` are combined with the `host` to create the URL to connect.
+For `http` and `https` requests, `path`, `query`, and `fragment` are combined with the `host` to create the URL to connect to.
 
-The `response` section defines how to handle the service response. By default the full text of th response is returned as a string, but the `type` can be used to interpret the `json` as a restsh object instead. The `transform` section allows you to specify a restsh command whose result replaces the default response object as the call method's result. Similarly, the `error` section is a restsh command whose result, if `true`, causes the call method to throw an error rather than return a result.
+The `response` section defines how to handle the service response. By default the full text of th response is returned as a string, but the `type` can be set to `json` parse the response as JSON instead. The `transform` section allows you to specify a restsh command whose result replaces the default response object as the call method's result. Similarly, the `error` section is a restsh command whose result, if `true`, causes the call method to throw an error rather than return a result.
+
+## Authentication Data
+
+The authentication `data` field is the actual authentication token etc. that is passed to the service, so it can (and probably should) be omitted from the service file and instead set during a restsh session with `setAuthentication`.
+
+For `basic` authentication, the user name and password should both be provided, separated by a `:`.
+
+Similarly, for `cookie` authentication, the cookie name and value should be provided, also separated by a `:`.
+
+The `http` and `https` protocols allowed any other arbitrary `type` to be specified. The specified type (`bearer` for instance) will be used as the "scheme" of the HTTP `authorization` header, and the authentication data will be provided verbatim as the credentials.
+
+The `amqp` protocol only supports `basic` authentication.
 
 ## Parameter Data Types
 
@@ -307,6 +322,7 @@ The array, collection, object, and function types may be specified with further 
 
 The following call attributes allow for template variables:
 
+* headers
 * body
 * path
 * query
@@ -360,6 +376,8 @@ requirement. If you want to define AMQP-based services, you will need to
 pip-install amqp separately.
 
 Services using the `amqp` protocol only support `basic` authentication (or none).
+
+Header values for AMQP calls may be integers and floats in addition to strings.
 
 # Scripting
 

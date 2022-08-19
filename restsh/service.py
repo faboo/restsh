@@ -171,7 +171,7 @@ class HttpService(Service):
         print('data is\n', data)
 
         for header, value in call['headers'].items():
-            headers[header] = self.fillTemplate(value, params, arguments)
+            headers[header] = self.fillTemplate(str(value), params, arguments)
 
         req = request.Request(
             urlunparse(
