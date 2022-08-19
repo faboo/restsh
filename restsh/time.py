@@ -56,6 +56,12 @@ def bParse(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[E
     return Time(time)
 
 
+def bTimestamp(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
+    time = cast(Time, dereference(args['time'])).getValue()
+
+    return wrap(time.timestamp())
+
+
 def bLt(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     left = cast(Time, dereference(args['left'])).getValue()
     right = cast(Time, dereference(args['right'])).getValue()
@@ -76,6 +82,7 @@ def register(environment:Environment):
         , 'parse': Builtin('parse', bParse, {'str': 'string'})
         , 'show': Builtin('show', bShow, {'time': 'time', 'tz': 'string'})
         , 'showhttp': Builtin('showhttp', bShowhttp, {'time': 'time', 'tz': 'string'})
+        , 'timestamp': Builtin('timestamp', bTimestamp, {'time': 'time'})
         , 'lt': Builtin('lt', bLt, {'left': 'time', 'right': 'time'})
         , 'gt': Builtin('gt', bGt, {'left': 'time', 'right': 'time'})
         })
