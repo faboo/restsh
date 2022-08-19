@@ -48,17 +48,17 @@ operators['!='] = (bEqual, ('any', 'any'))
 
 
 @add('+', ('number', 'number'))
-def bAdd(left:int, right:int) -> int:
+def bAdd(left:Union[int,float], right:Union[int,float]) -> Union[int,float]:
     return left + right
 
 
 @add('-', ('number', 'number'))
-def bMinus(left:int, right:int) -> int:
+def bMinus(left:Union[int,float], right:Union[int,float]) -> Union[int,float]:
     return left - right
 
 
 @add('*', ('number', 'number'))
-def bMultiply(left:int, right:int) -> int:
+def bMultiply(left:Union[int,float], right:Union[int,float]) -> Union[int,float]:
     return left * right
 
 
@@ -68,7 +68,7 @@ def bDivide(left:Union[int,float], right:Union[int,float]) -> Union[int,float]:
 
 
 @add('<', ('number', 'number'))
-def bLessThan(left:int, right:int) -> bool:
+def bLessThan(left:Union[int,float], right:Union[int,float]) -> bool:
     return left < right
 
 

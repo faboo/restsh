@@ -1,11 +1,13 @@
 from typing import Dict, Any, Optional
 import os
 import uuid
+import ssl
 from urllib import request
 from urllib.parse import urlunparse
 import time
 import yaml
 import json
+import base64
 import re
 
 class UnsupportedProtocol(Exception):
@@ -75,6 +77,7 @@ class Service:
             definition,
             { 'timeout': 60
             , 'params': {}
+            , 'headers': {}
             , 'response': 
                 { 'type': 'text'
                 , 'transform': None
@@ -110,18 +113,23 @@ class Service:
 
 
 class HttpService(Service):
+    def __init__(self, definition:dict) -> None:
+        super().__init__(definition)
+
+        self.ignoreTlsErrors = definition.get('ignoreTlsErrors', False)
+
     def addAuth(self, headers:dict) -> None:
         if self.authType is not None and self.authData is not None:
             if self.authType.startswith('cookie'):
                 (_, cookie) = self.authType.split(':')
                 headers['set-cookie'] = '%s=%s' % (cookie, self.authData)
+            elif self.authType.startswith('basic'):
+                headers['authorization'] = b'basic '+base64.b64encode(self.authData.encode('utf-8'))
             else:
-                # TODO: basic auth?
                 headers['authorization'] = self.authType+' '+self.authData
 
 
     def call(self, name:str, arguments:dict) -> Any:
-        # TODO: headers?
         call = self.callDef[name]
         timeout = call['timeout']
         params = self.describe(name)
@@ -131,6 +139,7 @@ class HttpService(Service):
         fragment = call.get('fragment', None)
         responseType = call['response']['type']
         data = call.get('body', None)
+        otherargs = { }
         headers = \
             { 'User-Agent': 'restsh/1.0'
             }
@@ -140,6 +149,13 @@ class HttpService(Service):
 
         if self.needsAuth(name):
             self.addAuth(headers)
+
+        if self.ignoreTlsErrors:
+            print('Ignoring TLS errors')
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            otherargs['context'] = ctx
 
         path = self.fillTemplate(path, params, arguments)
         print('path is\n', path)
@@ -154,6 +170,8 @@ class HttpService(Service):
             data = self.fillTemplate(data, params, arguments)
         print('data is\n', data)
 
+        for header, value in call['headers'].items():
+            headers[header] = self.fillTemplate(value, params, arguments)
 
         req = request.Request(
             urlunparse(
@@ -170,11 +188,13 @@ class HttpService(Service):
         
         print('request:\n', req.__dict__)
 
-        with request.urlopen(req, timeout=timeout) as response:
+        with request.urlopen(req, timeout=timeout, **otherargs) as response:
 
             status = response.status
             headers = response.headers
             text = response.read().decode('utf-8')
+
+            print(text)
 
         if responseType == 'json':
             result = json.loads(text)
@@ -209,6 +229,7 @@ class AmqpService(Service):
         queue = call.get('queue', None)
         responseType = call['response']['type']
         data = call.get('body', '')
+        headers = { }
         connConf:dict = {}
         text = ''
         result = ''
@@ -218,6 +239,12 @@ class AmqpService(Service):
 
         if self.needsAuth(name):
             self.addAuth(connConf)
+
+        for header, value in call['headers'].items():
+            if isinstance(value, str):
+                headers[header] = self.fillTemplate(value, params, arguments)
+            else:
+                headers[header] = value
 
         with amqp.Connection(
                 self.host,
@@ -231,7 +258,7 @@ class AmqpService(Service):
 
             print('publishing message: ', str(data))
             chan.basic_publish(
-                amqp.Message(data, reply_to=replyQueue),
+                amqp.Message(data, reply_to=replyQueue, application_headers=headers),
                 routing_key=queue)
 
             while not response:
