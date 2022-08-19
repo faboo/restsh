@@ -78,12 +78,22 @@ def bGt(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval
 
 def register(environment:Environment):
     timeObj = DictObject(
-        { 'now': Builtin('now', bNow, {})
-        , 'parse': Builtin('parse', bParse, {'str': 'string'})
-        , 'show': Builtin('show', bShow, {'time': 'time', 'tz': 'string'})
-        , 'showhttp': Builtin('showhttp', bShowhttp, {'time': 'time', 'tz': 'string'})
-        , 'timestamp': Builtin('timestamp', bTimestamp, {'time': 'time'})
+        { 'now': Builtin('now', bNow, {}, 'Returns a new Time object with the current time and date.')
+        , 'parse': Builtin('parse', bParse, {'str': 'string'}, 'Generically parse a date/time string.')
+        , 'show': Builtin('show',
+            bShow,
+            {'time': 'time', 'tz': 'string'},
+            'Convert a Time to a string in ISO format.')
+        , 'showhttp': Builtin('showhttp',
+            bShowhttp,
+            {'time': 'time', 'tz': 'string'},
+            'Convert a Time to a string in HTTP request format.')
+        , 'timestamp': Builtin('timestamp',
+            bTimestamp,
+            {'time': 'time'},
+            'Convert a Time to a Unix timestamp.')
         , 'lt': Builtin('lt', bLt, {'left': 'time', 'right': 'time'})
         , 'gt': Builtin('gt', bGt, {'left': 'time', 'right': 'time'})
         })
+    timeObj.description = 'Functions to create and manipulate Time.'
     environment.setVariable('time', timeObj)

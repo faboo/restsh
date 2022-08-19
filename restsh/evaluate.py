@@ -101,6 +101,10 @@ class ElementList(Eval):
 
 
 class Object(Eval):
+    def __init__(self):
+        super().__init__()
+        self.description:Optional[str] = None
+
     def get(self, name:str, environment:Environment) -> Union[Eval, Cell]:
         return self
 

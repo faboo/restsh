@@ -42,6 +42,12 @@ To install you can either use the provided install.sh script, or from the top of
 
 	$ pip3 install .
 
+## But WHY Though?
+
+I here what you're saying, "This is all written in Python. Can't you just write Python scripts instead?" and yes, you could. And if you're going to be writing anything permanent, you absolute should.
+
+However, Restsh aims to be a pleasant, helpful environment for when you want to experiment, or need to get something oddly specific done fast.
+
 # Basics
 
 ## Types
