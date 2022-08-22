@@ -1,6 +1,7 @@
 ---
 protocol: https
 host: outlook.office.com
+description: Outlook REST API
 authentication:
   type: bearer
 call:

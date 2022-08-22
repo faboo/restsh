@@ -42,6 +42,12 @@ To install you can either use the provided install.sh script, or from the top of
 
 	$ pip3 install .
 
+## Getting Help
+
+The shell contains a small help system invoked with the `help` command. Use it on its own to see a brief overview of the Restsh session, provide it a value to show information about it. For functions, this includes parameters and their expected types. For objects, this includes each of their properties and their current value types.
+
+Built-in functions and objects, and service objects and methods may include additional information about their use as well.
+
 ## But WHY Though?
 
 I hear what you're saying, "This is all written in Python. Can't you just write Python scripts instead?" and yes, you could. And if you're going to be writing anything permanent, you absolute should.
@@ -249,11 +255,13 @@ Service definitions are layed out as follows:
 	---
 	protocol: http|https|amqp
 	host: host & port
+	description: displayed by the help command
 	authentication:
 	  type: basic|bearer|cookie|etc
 	  data: auth data string
 	call:
 	  - name: method name
+	    description: displayed by the help command
 	    timeout: call timeout in seconds; 60 second default
 	    params:
 	      method-param1: data type

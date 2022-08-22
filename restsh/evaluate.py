@@ -424,6 +424,7 @@ class ServiceObject(Object):
         if service.has(name):
             if name not in self.calls:
                 self.calls[name] = ServiceCall(self.name, name)
+                self.calls[name].description = service.callDef[name]['description']
             return self.calls[name]
         else:
             if name not in self.methods:
@@ -717,6 +718,7 @@ class Import(Eval):
         try:
             environment.services[self.name] = Service.loadService(filename)
             environment.setVariable(self.name, service)
+            service.description = environment.services[self.name].description
         except UnsupportedProtocol as ex:
             environment.error('Unsupport protocol "%s"' % ex.protocol)
 

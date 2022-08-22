@@ -1,10 +1,12 @@
 ---
 protocol: https
 host: gmail.googleapis.com
+description: Google Workspace API(s)
 authentication:
   type: bearer
 call:
   - name: deleteFilter
+    description: Delete a mailbox filter.
     params:
       mboxId: string
       filterId: string

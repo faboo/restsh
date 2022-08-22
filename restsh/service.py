@@ -38,6 +38,7 @@ class Service:
     def __init__(self, definition:dict) -> None:
         self.host:str = definition.get('host', 'localhost')
         self.protocol:str = definition['protocol']
+        self.description:Optional[str] = definition.get('description', None)
         self.authType:Optional[str] = None
         self.authData:Optional[str] = None
         self.callDef:Dict[str, dict] = { }
@@ -76,6 +77,7 @@ class Service:
         self.fillCall(
             definition,
             { 'timeout': 60
+            , 'description': None
             , 'params': {}
             , 'headers': {}
             , 'response': 

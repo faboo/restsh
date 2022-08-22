@@ -1,6 +1,7 @@
 ---
 protocol: https
 host: graph.microsoft.com
+description: Microsoft Graph API
 authentication:
   type: bearer
 call:
