@@ -6,7 +6,7 @@ import re
 import json
 import base64
 from .environment import Environment, Cell
-from .evaluate import dereference, wrap, Eval, Builtin, Array, Function, ServiceObject, DictObject, String, Boolean \
+from .evaluate import dereference, wrap, Eval, Builtin, Array, Function, ServiceObject, Object, String, Boolean \
     , Integer, Float, Null
 from .repl import repLoop
 
@@ -60,8 +60,8 @@ def bSize(environment:Environment, args:Dict[str,Eval]) -> Any:
         return len(value.parameters(environment))
     elif isinstance(value, ServiceObject):
         return len(environment.services[cast(ServiceObject, value).name].callDef)
-    elif isinstance(value, DictObject):
-        return len(cast(DictObject, value).properties)
+    elif isinstance(value, Object):
+        return len(cast(Object, value).properties)
     elif isinstance(value, String):
         return len(cast(String, value).getValue())
     else:

@@ -3,6 +3,7 @@ import sys
 import os
 from .environment import Environment
 from .repl import repLoop
+from .reader import tabCompleter
 from .evaluate import Null, Boolean
 from . import builtins
 from . import operators
@@ -25,12 +26,15 @@ def setupArguments(args:list) -> argparse.Namespace:
     return parser.parse_args()
 
 
-def readHistory() -> None:
+def setupReadline(environment:Environment) -> None:
     try:
         import readline #pylint: disable=import-outside-toplevel
         historyName = os.path.expanduser('~/.restsh_history')
         readline.read_history_file(historyName)
         readline.set_history_length(100)
+        readline.parse_and_bind("tab: menu-complete")
+        readline.set_completer(lambda text, state: tabCompleter(environment, text, state))
+        readline.set_completer_delims(" \t\n")
     except: #pylint: disable=bare-except
         pass
 
@@ -100,7 +104,7 @@ def main(args:list=None):
 
     else:
         try:
-            readHistory()
+            setupReadline(environment)
             describe.printWrapped(environment, describe.LeaderHelp)
             repLoop(environment)
         finally:

@@ -1,0 +1,10 @@
+pytest
+pytest-cov
+pytest-env
+pytest-mock
+
+mypy
+types-PyYAML
+types-python-dateutil
+
+pylint

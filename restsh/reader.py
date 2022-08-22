@@ -1,5 +1,6 @@
 from typing import Tuple, Optional, List
 import sys
+import re
 from .environment import Environment
 from .token import Token, tokens
 
@@ -22,6 +23,45 @@ def readToken(line:str) -> Optional[Tuple[Token,str]]:
             return (token(text), line.lstrip())
 
     return None
+
+
+def tabCompleter(environment:Environment, text:str, state:int) -> Optional[str]:
+    commands = ['help', 'exit', 'import', 'let']
+
+    try:
+        symre = '[_a-zA-Z][_a-zA-Z0-9]*'
+        lastObjRef = re.search(f'({symre}(?:\\.{symre}|\\.)*)$', text)
+        suggestions = []
+
+        if not lastObjRef:
+            suggestions = [key for key in environment.variables.keys() if re.match(symre, key)]
+            suggestions = commands + suggestions
+        else:
+            syms = lastObjRef[0].split('.')
+
+            if len(syms) == 1:
+                suggestions = [key for key in environment.variables.keys() if re.match(symre, key)]
+                suggestions = commands + suggestions
+                suggestions = [sugg for sugg in suggestions if sugg.startswith(syms[0])]
+            else:
+                obj = environment.getVariableValue(syms[0])
+                lastRef = syms[1]
+
+                for ref in syms[1:-1]:
+                    if ref:
+                        obj = obj.get(ref, environment)
+                        lastRef = ref
+
+                prefix = '.'.join(syms[:-1])
+                suggestions = [prefix+'.'+key for key in obj.properties if key.startswith(lastRef)]
+
+    except Exception as ex:
+        print('ex; %s' % ex)
+    
+    if state < len(suggestions):
+        return suggestions[state]
+    else:
+        return None
 
 
 def readTokens(line:str) -> List[Token]:

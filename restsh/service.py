@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import os
 import uuid
 import ssl
@@ -94,6 +94,9 @@ class Service:
     def has(self, name:str) -> bool:
         return name in self.callDef
 
+    def getCallNames(self) -> List[str]:
+        return list(self.callDef.keys())
+
     def describe(self, name:str) -> Dict[str, str]:
         return self.callDef[name].get('params', {})
 
@@ -188,7 +191,7 @@ class HttpService(Service):
         
         print('request:\n', req.__dict__)
 
-        with request.urlopen(req, timeout=timeout, **otherargs) as response:
+        with request.urlopen(req, timeout=timeout, **otherargs) as response: #type: ignore
 
             status = response.status
             headers = response.headers

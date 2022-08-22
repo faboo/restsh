@@ -77,6 +77,8 @@ def function(env:Environment, func:Any) -> None:
         description = 'It takes %s arguments:\n' % len(params)
 
         for param, ptype in params.items():
+            if ptype[0] == '?':
+                ptype = ptype[1:] + ' (optional)'
             description += '\t%s: %s\n' % (param, ptype)
 
         printWrapped(env, description)
@@ -86,21 +88,22 @@ def function(env:Environment, func:Any) -> None:
 
 def object(env:Environment, obj:Any) -> None:
     service = hasattr(obj, 'name') and obj.name in env.services
-    properties = {**env.services[obj.name].callDef, **obj.methods} \
+    properties = [*env.services[obj.name].callDef.keys(),  *obj.methods.keys()] \
         if service \
         else obj.properties
     description = 'It has %s properties:\n' % len(properties)
 
-    for param, value in properties.items():
+    for prop in properties:
+        value = obj.get(prop, env)
         value = value.value if isinstance(value, Cell) else value
         if service:
             description += '\t%s: %s\n' % \
-                ( param
+                ( prop
                 , 'function'
                 )
         else:
             description += '\t%s: %s\n' % \
-                ( param
+                ( prop
                 , typeName(value)
                 )
 

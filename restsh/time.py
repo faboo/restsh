@@ -51,7 +51,7 @@ def bParse(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[E
     if time.tzinfo is None:
         time = time.replace(tzinfo=timezone.utc)
     else:
-        time = time.astimezone(dateutil.tz.gettz(tzstr))
+        time = time.astimezone(timezone.utc)
 
     return Time(time)
 

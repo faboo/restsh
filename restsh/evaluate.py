@@ -108,6 +108,10 @@ class Object(Eval):
     def get(self, name:str, environment:Environment) -> Union[Eval, Cell]:
         return self
 
+    @property
+    def properties(self) -> List[str]:
+        return []
+
     def isType(self, typeDesc:str) -> bool:
         return super().isType(typeDesc) or typeDesc.startswith('object') \
             or typeDesc.startswith('collection')
@@ -196,6 +200,10 @@ class Function(Object):
             environment.error('%s has no member %s' % (self, name))
 
         return result
+
+    @property
+    def properties(self) -> List[str]:
+        return ['parameters']
 
     def parameters(self, environment:Environment) -> Dict[str, str]:
         return {}
@@ -422,17 +430,21 @@ class ServiceObject(Object):
                 environment.error('%s has no defined call named %s' % (self.name, name))
             return self.methods[name]
 
+    @property
+    def properties(self) -> List[str]:
+        return list(self.calls.keys()) + list(self.methods.keys())
+
 
 class DictObject(Object):
     def __init__(self, props:Dict[str, Eval]) -> None:
         self.evaluated = False
-        self.properties:Dict[str, Cell] = \
+        self._properties:Dict[str, Cell] = \
             { prop: Cell(value)
               for prop, value in props.items()
             }
 
     def __repr__(self) -> str:
-        return '{ %s}' % ', '.join('%s: %s\n' % (prop, repr(value)) for prop, value in self.properties.items())
+        return '{ %s}' % ', '.join('%s: %s\n' % (prop, repr(value)) for prop, value in self._properties.items())
 
     @staticmethod
     def parse(_:LBrace, *args) -> Eval:
@@ -457,7 +469,7 @@ class DictObject(Object):
         return \
             { prop: value.toPython()
               for prop, value
-              in self.properties.items()
+              in self._properties.items()
             }
 
     def evaluate(self, environment:Environment) -> Union[Eval, Cell]:
@@ -466,15 +478,19 @@ class DictObject(Object):
 
         obj = DictObject(
             { prop: dereference(value.value.evaluate(environment))
-              for prop, value in self.properties.items()
+              for prop, value in self._properties.items()
             })
         obj.evaluated = True
         return obj
 
     def get(self, name:str, environment:Environment) -> Union[Eval, Cell]:
-        if name not in self.properties:
+        if name not in self._properties:
             environment.error(f'Object has no property \'{name}\'')
-        return self.properties[name]
+        return self._properties[name]
+
+    @property
+    def properties(self) -> List[str]:
+        return list(self._properties.keys())
 
 
 class ObjectRef(Eval):

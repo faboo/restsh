@@ -99,4 +99,5 @@ def register(environment:Environment):
         , 'delete': Builtin('delete', bHead, {'url': 'string'})
         , 'options': Builtin('options', bHead, {'url': 'string'})
         })
+    httpObj.description = "Functions for making simple HTTP requests."
     environment.setVariable('http', httpObj)
