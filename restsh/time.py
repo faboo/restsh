@@ -15,6 +15,12 @@ class Time(Constant):
         
     def __repr__(self) -> str:
         return '<%s>' % self.time
+        
+    def __str__(self) -> str:
+        return self.time.isoformat()
+
+    def toPython(self) -> Any:
+        return str(self.time)
 
     def isType(self, typeDesc:str) -> bool:
         return super().isType(typeDesc) or typeDesc == 'time'

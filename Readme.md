@@ -196,11 +196,11 @@ Custom functions are defined like this:
 where the above is a function that takes two arguments, `foo` and `bar`, and returns their sum. You might call it like
 this:
 
-	$ let sum = \foo, bar. foo + bar
+	$ let sum = \foo, bar. foo - bar
 	$ sum(foo: 5, bar: 3)
-	8
+	2
 	$ sum(bar: 3, foo: 5)
-	8
+	2
 
 Notice that the order of the arguments doesn't matter - just that they're named correctly. Built-in functions and service methods may also have specific type requirements for their arguments.
 

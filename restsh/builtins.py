@@ -7,7 +7,7 @@ import json
 import base64
 from .environment import Environment, Cell
 from .evaluate import dereference, wrap, Eval, Builtin, Array, Function, ServiceObject, Object, String, Boolean \
-    , Integer, Float, Null
+    , Integer, Float, Null, Constant
 from .repl import repLoop
 
 builtins:Dict[
@@ -79,6 +79,22 @@ def bEval(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     env.input = io.StringIO(initial_value=cast(String, value).getValue())
 
     return repLoop(env)
+
+
+@add('type', {'of': 'any'}, 'Get the type of a value')
+def bType(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+    value = args['of']
+
+    if isinstance(value, Constant):
+        typeName = value.__class__.__name__.lower()
+    elif isinstance(value, Function):
+        typeName = 'function'
+    elif isinstance(value, Array):
+        typeName = 'array'
+    elif isinstance(value, Object):
+        typeName = 'object'
+
+    return wrap(typeName)
     
 
 @add('map', {'arr': 'array', 'fn': 'function[item,index]'})
@@ -113,7 +129,7 @@ def bFilter(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return Array(result)
 
 
-@add('reduce', {'arr': 'array', 'fn': 'function[accum,item,index]'})
+@add('reduce', {'arr': 'array', 'fn': 'function[accum,item,index]'}, 'Reduce left-to-right')
 def bReduce(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     array = cast(Array, args['arr'])
     func = cast(Function, args['fn'])
@@ -133,7 +149,7 @@ def bReduce(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return accum
 
 
-@add('rreduce', {'arr': 'array', 'fn': 'function[accum,item,index]'})
+@add('rreduce', {'arr': 'array', 'fn': 'function[accum,item,index]'}, 'Reduce right-to-left')
 def bRreduce(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     array = cast(Array, args['arr'])
     func = cast(Function, args['fn'])
@@ -226,7 +242,15 @@ def bSplit(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return Array([String(string) for string in re.split(onStr, text)])
 
 
-@add('tojson', {'val': 'any'})
+@add('join', {'with': 'string', 'arr': 'array'}, 'Join the elements of an array into a string')
+def bJoin(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+    text = cast(String, args['with']).getValue()
+    array = cast(Array, args['arr']).elements
+
+    return wrap(text.join([str(elm) for elm in array]))
+
+
+@add('tojson', {'val': 'any'}, 'Convert ')
 def bTojson(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     val = args['val']
     return String(json.dumps(val.toPython()))

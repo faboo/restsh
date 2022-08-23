@@ -6,6 +6,7 @@ from .token import Sym, Eq, LParen, RParen, LAngle, RAngle, LBrace, RBrace, LBra
 from .service import Service, UnsupportedProtocol
 from . import describe
 from . import terminal
+from .module import importModule
 
 
 class Eval:
@@ -713,14 +714,21 @@ class Import(Eval):
 
     def evaluate(self, environment:Environment) -> Union[Eval, Cell]:
         filename = self.name.replace('.', '/') + '.yaml'
-        service = ServiceObject(self.name)
+        service:Eval = Null()
 
         try:
+            service = ServiceObject(self.name)
+
             environment.services[self.name] = Service.loadService(filename)
             environment.setVariable(self.name, service)
             service.description = environment.services[self.name].description
         except UnsupportedProtocol as ex:
             environment.error('Unsupport protocol "%s"' % ex.protocol)
+        except FileNotFoundError:
+            try:
+                importModule(self.name, environment)
+            except FileNotFoundError:
+                environment.error('Could not find service or module %s' % self.name)
 
         return service
 
