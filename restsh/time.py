@@ -92,8 +92,14 @@ def register(environment:Environment):
             bTimestamp,
             {'time': 'time'},
             'Convert a Time to a Unix timestamp.')
-        , 'lt': Builtin('lt', bLt, {'left': 'time', 'right': 'time'})
-        , 'gt': Builtin('gt', bGt, {'left': 'time', 'right': 'time'})
+        , 'lt': Builtin('lt',
+            bLt,
+            {'left': 'time', 'right': 'time'},
+            'Returns true if the \'left\' argument is before (less than) the \'right\'.')
+        , 'gt': Builtin('gt',
+            bGt,
+            {'left': 'time', 'right': 'time'},
+            'Returns true if the \'left\' argument is after (greather than) the \'right\'.')
         })
     timeObj.description = 'Functions to create and manipulate Time.'
     environment.setVariable('time', timeObj)
