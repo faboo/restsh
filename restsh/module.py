@@ -8,29 +8,24 @@ from .environment import Environment
 def importModule(name:str, environment:Environment) -> None:
     shortname = name+'.py'
     homename = os.path.expanduser('~/.restsh/'+shortname)
-    moduleName = 'dyn.restsh.'+name
+    moduleName = 'dynrestsh'+name
 
-    if moduleName in sys.modules:
-        importlib.reload(sys.modules[moduleName])
-
-        module.register(environment)
+    if os.path.exists(shortname):
+        pathname = os.path.normpath(shortname)
+    elif os.path.exists(homename):
+        pathname = homename
     else:
-        if os.path.exists(shortname):
-            pathname = os.path.normpath(shortname)
-        elif os.path.exists(homename):
-            pathname = homename
-        else:
-            raise FileNotFoundError(shortname)
+        raise FileNotFoundError(shortname)
 
-        spec = importlib.util.spec_from_file_location(moduleName, pathname)
+    spec = importlib.util.spec_from_file_location(moduleName, pathname)
 
-        if spec is None:
-            raise FileNotFoundError(shortname)
+    if spec is None:
+        raise FileNotFoundError(shortname)
 
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[moduleName] = module
-        if spec.loader is not None:
-            spec.loader.exec_module(module)
+    module:Any = importlib.util.module_from_spec(spec)
+    sys.modules[moduleName] = module
+    if spec.loader is not None:
+        spec.loader.exec_module(module)
 
-        module.register(environment)
+    module.register(environment)
 

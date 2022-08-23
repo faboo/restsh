@@ -19,9 +19,20 @@ def bCreate(environment, args):
 
     return Set(array.toPython())
 
+
+@restsh.builtin('array', {'set': 'set'}, 'Return the elements of a set as an array')
+def bArray(environment, args):
+    set = args['set']
+
+    return restsh.Array([restsh.wrap(elm) for elm in set.elements])
+
+
+# register() will be called with an Environment object when the module is loaded (or reloaded). 
 def register(environment):
+    # Setting up an object to contain the functions your module creates is useful, but not required.
     setObj = restsh.DictObject(
         { 'create': bCreate
+        , 'array': bArray
         })
     setObj.description = 'Functions for working with sets'
 
