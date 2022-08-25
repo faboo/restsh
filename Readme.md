@@ -221,6 +221,13 @@ Most errors cancel execution of a command. However, if it's desirable to ignore 
 	null
 	$ 
 
+## Comments
+
+You can include a comment in a script (or at the prompt if you want) with the `#` character.
+
+	# This is a comment
+	print(text: "Write scripts. Wage wars. Die handsome.") # So is this
+
 # Web Requests
 
 Simple web requests can be made with the `http` object. `http`'s methods all take a complete URL, and return the text response of the request. On a non-2XX or 1XX response, an error is thrown with the status text of the response.
@@ -394,3 +401,21 @@ Header values for AMQP calls may be integers and floats in addition to strings.
 On startup, restsh will look for a file named `~/.restshrc` and run all of the commands there before the first prompt. Additionally, you can direct restsh to run other script files before first prompt with the `--environment` command-line argument.
 
 If other files are provided on the command-line, they will be run in order and then the interpreter will exit. This can be combined with `--environment` arguments.
+
+## Standalone Scripts
+
+While in general you probably want to use something like Python for standalone scripts, you can create Restsh scripts similarly to shell scripts:
+
+```
+$ cat > runme <<END
+#!/usr/local/bin/restsh
+
+print(text: "You ran me!")
+END
+$ chmod u+x runme
+$ ./runme
+You ran me!
+$
+```
+
+Arguments passed to the script on the command line are stored as an array of strings in the `args` top-level variable.
