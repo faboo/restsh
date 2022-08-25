@@ -21,6 +21,8 @@ $ import outlook
 $ help outlook.setAuthentication
 outlook.setAuthentication is a function 
  
+Replace the authentication data for this service. 
+
 It takes 1 arguments: 
   auth: string 
  

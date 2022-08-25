@@ -70,6 +70,9 @@ def readTokens(line:str) -> List[Token]:
     line = line.lstrip()
 
     while line:
+        if line[0] == '#':
+            break
+            
         result = readToken(line)
         if not result:
             raise UntokenizableError('Unrecognized text: '+line[:20])

@@ -272,6 +272,12 @@ def bB64encode(environment:Environment, args:Dict[str,Eval]) -> Any:
 def bB64decode(environment:Environment, args:Dict[str,Eval]) -> Any:
     b64 = cast(String, args['b64']).getValue()
     return base64.b64decode(b64).decode('utf-8')
+
+
+@add('print', {'text': 'string'})
+def bB64decode(environment:Environment, args:Dict[str,Eval]) -> Any:
+    text = cast(String, args['text']).getValue()
+    return environment.print(text)
     
 
 

@@ -4,7 +4,7 @@ import os
 from .environment import Environment
 from .repl import repLoop
 from .reader import tabCompleter
-from .evaluate import Null, Boolean
+from .evaluate import wrap, Null, Boolean
 from . import builtins
 from . import operators
 from . import http
@@ -22,6 +22,7 @@ def setupArguments(args:list) -> argparse.Namespace:
     parser.add_argument('--debug-errors', action='store_true', default=False)
     parser.add_argument('--version', action='store_true', default=False)
     parser.add_argument('script', nargs='?')
+    parser.add_argument('scriptargs', nargs='*')
 
     return parser.parse_args()
 
@@ -70,6 +71,7 @@ def main(args:list=None):
     environment.ngParser = arguments.ng_parser
     environment.debugErrors = arguments.debug_errors
 
+    environment.setVariable('args', wrap(arguments.scriptargs))
     environment.setVariable('__result', Null())
     environment.setVariable('null', Null())
     environment.setVariable('true', Boolean(True))

@@ -70,7 +70,8 @@ def repLoop(environment:Environment) -> Eval:
                     for expr in exprs:
                         terminal.setTitle(environment.output, repr(expr)[:30])
                         result = expr.evaluate(environment)
-                        if environment.output.isatty() and printable(expr):
+                        # TODO: Just have a way to turn this off
+                        if environment.input.isatty() and environment.output.isatty() and printable(expr):
                             terminal.setForeground(environment.output, environment.getVariable('*resultcolor').value)
                             environment.print('%s' % str(result))
                             terminal.reset(environment.output)

@@ -396,7 +396,12 @@ class ServiceObject(Object):
         self.calls:Dict[str,ServiceCall] = {}
         self.methods:Dict[str,Builtin] = \
             { 'setHost': Builtin('setHost', self.setHost, {'host': 'string'})
-            , 'setAuthentication': Builtin('setAuthentication', self.setAuthentication, {'auth': 'string'})
+            , 'setAuthentication':
+                Builtin(
+                    'setAuthentication',
+                    self.setAuthentication,
+                    {'auth': 'string'},
+                    'Replace the authentication data for this service.')
             }
 
     def __repr__(self) -> str:

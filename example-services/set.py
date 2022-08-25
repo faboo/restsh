@@ -1,5 +1,8 @@
 import restsh
 
+# Here be dragons. This is a Restsh module written in Python. It can be loaded in the same manner (and with the same
+# directory search behavior) a service.
+
 class Set(restsh.Constant):
     def __init__(self, elements):
         self.elements = set(elements)
