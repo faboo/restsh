@@ -115,6 +115,9 @@ class Production:
                 longestMatch = match
 
         #print(' '*offset, '-> %s' % (longestMatch,))
+        if longestMatch[1] and eot:
+            raise EndOfTokens()
+
         return cast(Tuple[Eval, ParseStack], longestMatch)
 
 

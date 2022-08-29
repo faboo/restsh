@@ -52,7 +52,7 @@ Built-in functions and objects, and service objects and methods may include addi
 
 ## But WHY Though?
 
-I hear what you're saying, "This is all written in Python. Can't you just write Python scripts instead?" and yes, you could. And if you're going to be writing anything permanent, you absolute should.
+I hear what you're saying, "This is all written in Python. Can't you just write Python scripts instead?" and yes, you could. And if you're going to be writing anything permanent, you absolutely should.
 
 However, Restsh aims to be a pleasant, helpful environment for when you want to experiment, or need to get something oddly specific done fast.
 
