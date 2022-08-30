@@ -72,6 +72,11 @@ def bLessThan(left:Union[int,float], right:Union[int,float]) -> bool:
     return left < right
 
 
+@add('>', ('number', 'number'))
+def bLessThan(left:Union[int,float], right:Union[int,float]) -> bool:
+    return left > right
+
+
 @add('||', ('boolean', 'boolean'))
 def bOr(left:bool, right:bool) -> bool:
     return left or right

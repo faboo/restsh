@@ -54,6 +54,11 @@ class Environment:
         raise EvaluationError(string)
 
     @property
+    def interactive(self) -> bool:
+        return terminal.istty(self.input) # TODO: AND output?
+        
+
+    @property
     def lastResult(self) -> Any:
         return self.getVariable('__result')
 

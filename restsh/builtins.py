@@ -275,11 +275,17 @@ def bB64decode(environment:Environment, args:Dict[str,Eval]) -> Any:
 
 
 @add('print', {'text': 'string'})
-def bB64decode(environment:Environment, args:Dict[str,Eval]) -> Any:
+def bPrint(environment:Environment, args:Dict[str,Eval]) -> Any:
     text = cast(String, args['text']).getValue()
     return environment.print(text)
-    
 
+
+@add('get', {'obj': 'object', 'name': 'string'}, 'Get a property of an object by name')
+def bGet(environment:Environment, args:Dict[str,Eval]) -> Any:
+    name = cast(String, args['name']).getValue()
+    obj = cast(Object, args['obj'])
+
+    return obj.get(name, environment)
 
 def bSet(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     cell = args['var']

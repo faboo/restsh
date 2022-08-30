@@ -37,7 +37,11 @@ def repLoop(environment:Environment) -> Eval:
                 tokens = read(environment, previousTokens)
                 #print('tokenized: %s' % tokens)
             except EndOfFile:
-                environment.loop = False
+                if previousTokens and environment.interactive:
+                    previousTokens = []
+                    environment.print('')
+                else:
+                    environment.loop = False
             except UntokenizableError as ex:
                 environment.print(ex.message)
 

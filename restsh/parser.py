@@ -115,8 +115,6 @@ class Production:
                 longestMatch = match
 
         #print(' '*offset, '-> %s' % (longestMatch,))
-        if longestMatch[1] and eot:
-            raise EndOfTokens()
 
         return cast(Tuple[Eval, ParseStack], longestMatch)
 
@@ -331,6 +329,7 @@ statement = Production(
     )
 
 
+# TODO: Need a more nuanced way to communicate partial results than exceptions
 def parse(tokens:List[Token]) -> List[Eval]:
     results = []
     stack = cast(ParseStack, tokens)
