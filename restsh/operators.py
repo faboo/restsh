@@ -1,5 +1,5 @@
 from typing import cast, Union, Dict, Callable, Tuple, Optional, Any
-from .environment import Environment, Cell
+from .environment import Environment, Cell, EvaluationError
 from .evaluate import wrap, dereference, Eval, Builtin, Boolean, Constant
 
 operators:Dict[
@@ -26,6 +26,8 @@ def add(name:str, args:Tuple[str,str], retwrap:Optional[Callable[[Any], Union[Ev
                     return retwrap(result)
                 else:
                     return wrap(result)
+            except EvaluationError:
+                raise
             except Exception as ex:
                 environment.error("%s: %s" % (ex.__class__.__name__, ' '.join(ex.args)))
                 return wrap(None)
@@ -44,7 +46,7 @@ operators['=='] = (bEqual, ('any', 'any'))
 
 def bNotEqual(environment:Environment, args:Dict[str,Union[Cell, Eval]]) -> Union[Eval, Cell]:
     return Boolean(not dereference(args['left']).equal(dereference(args['right'])))
-operators['!='] = (bEqual, ('any', 'any'))
+operators['~='] = (bEqual, ('any', 'any'))
 
 
 @add('+', ('number', 'number'))

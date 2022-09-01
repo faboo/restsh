@@ -328,6 +328,8 @@ class ServiceCall(Function):
                     { 'code': wrap(respTrans) })
             else:
                 result = wrap(response['response'])
+        except EvaluationError:
+            raise
         except Exception as ex:
             environment.error('Error in remote call: %s' % repr(ex))
 

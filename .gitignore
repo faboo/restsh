@@ -16,6 +16,3 @@ local.*
 .vscode
 .coverage
 .pytest_cache
-docs/source/*.*.rst
-docs/source/policy.rst
-tldextract.cache

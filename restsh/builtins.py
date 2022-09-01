@@ -5,9 +5,10 @@ import sys
 import re
 import json
 import base64
-from .environment import Environment, Cell
+from .environment import Environment, Cell, EvaluationError
 from .evaluate import dereference, wrap, Eval, Builtin, Array, Function, ServiceObject, Object, String, Boolean \
     , Integer, Float, Null, Constant
+from .token import tokens, Op
 from .repl import repLoop
 
 builtins:Dict[
@@ -36,6 +37,8 @@ def add(
                     return retwrap(result)
                 else:
                     return wrap(result)
+            except EvaluationError:
+                raise
             except Exception as ex:
                 environment.error("%s: %s" % (ex.__class__.__name__, ' '.join(ex.args)))
                 return wrap(None)
@@ -287,6 +290,7 @@ def bGet(environment:Environment, args:Dict[str,Eval]) -> Any:
 
     return obj.get(name, environment)
 
+
 def bSet(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     cell = args['var']
     value = args['value']
@@ -314,6 +318,24 @@ def bSource(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
         finally:
             environment.input = sys.stdin
             environment.loop = True
+
+
+@add('defOperator', {'sym': 'string', 'func': 'function'}, 'Define a new operator')
+def bDefOperator(environment:Environment, args:Dict[str,Eval]) -> Any:
+    opre = next(regex for token, regex in tokens if token == Op)
+    chars = opre.pattern[1:-2]
+    sym = cast(String, args['sym']).getValue()
+    func = cast(Function, args['func'])
+    params = func.parameters(environment)
+
+    if not re.match(opre.pattern + '$', sym):
+        environment.error('New operators may only contain these characters: '+chars)
+    if 'left' not in params or 'right' not in params:
+        environment.error('Operator functions must take two parameters: \'left\' and \'right\'')
+
+    environment.setVariable(sym, func)
+    
+    return sym
 
 
 def register(environment:Environment):
