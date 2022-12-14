@@ -8,7 +8,7 @@ call:
   - name: filters
     params:
       mboxId: string
-    path: /beta/users/$mboxId$/MailFolders/inbox/messagerules
+    path: /v1.0/users/$mboxId$/MailFolders/inbox/messagerules
     method: GET
     response:
       type: json
@@ -16,10 +16,26 @@ call:
         response.value
 
   - name: users
-    path: /beta/users?$top=999
+    path: /v1.0/users?$top=999
     method: GET
     response:
       type: json
       transform: |
         response.value
 
+  - name: emails
+    params:
+      mboxId: string
+    path: /v1.0/users/$mboxId$/messages
+    method: GET
+    response:
+      type: json
+
+  - name: get
+    params:
+      mboxId: string
+      msgId: string
+    path: /v1.0/users/$mboxId$/messages/$msgId$
+    method: GET
+    response:
+      type: json

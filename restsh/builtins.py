@@ -256,7 +256,7 @@ def bJoin(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
 @add('tojson', {'val': 'any'}, 'Convert ')
 def bTojson(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     val = args['val']
-    return String(json.dumps(val.toPython()))
+    return val.toJson() #String(json.dumps(val.toPython()))
 
 
 @add('parsejson', {'str': 'string'})
@@ -334,7 +334,7 @@ def bDefOperator(environment:Environment, args:Dict[str,Eval]) -> Any:
         environment.error('Operator functions must take two parameters: \'left\' and \'right\'')
 
     environment.setVariable(sym, func)
-    
+
     return sym
 
 

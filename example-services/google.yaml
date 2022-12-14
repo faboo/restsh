@@ -13,6 +13,13 @@ call:
     path: /gmail/v1/users/$mboxId$/settings/filters/$filterId$
     method: DELETE
 
+  - name: filters
+    description: Get mailbox filters.
+    params:
+      mboxId: string
+    path: /gmail/v1/users/$mboxId$/settings/filters/
+    method: GET
+
   - name: getUsers
     path: /admin/directory/v1/users?customer=my_customer&viewType=admin_view&maxResults=250
     method: GET

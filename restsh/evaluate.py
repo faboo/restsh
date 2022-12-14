@@ -30,6 +30,9 @@ class Eval:
     def toPython(self) -> Any:
         return repr(self)
 
+    def toJson(self) -> str:
+        return repr(self)
+
     def equal(self, other:'Eval') -> bool:
         return id(self) == id(other)
 
@@ -125,6 +128,9 @@ class Array(Eval):
 
     def __repr__(self) -> str:
         return '[ %s ]' % (', '.join('%s' % repr(elm) for elm in self.elements))
+
+    def toJson(self) -> str:
+        return '[ %s ]' % (', '.join('%s' % dereference(elm).toJson() for elm in self.elements))
 
     @staticmethod
     def fromPython(lst:list) -> Eval:
@@ -455,6 +461,15 @@ class DictObject(Object):
     def __repr__(self) -> str:
         return '{ %s}' % ', '.join('%s: %s\n' % (prop, repr(value)) for prop, value in self._properties.items())
 
+
+    def __str__(self) -> str:
+        return self.toJson()
+
+
+    def toJson(self) -> str:
+        return '{ %s}' % ', '.join('"%s": %s\n' % (prop, dereference(value).toJson()) for prop, value in self._properties.items())
+
+
     @staticmethod
     def parse(_:LBrace, *args) -> Eval:
         if isinstance(args[0], ArgList):
@@ -578,6 +593,12 @@ class String(Constant):
 
     def __str__(self) -> str:
         return self.value
+
+    def toJson(self) -> str:
+        print('STRING TO JSON ', self.value[0:120])
+        value = self.value.replace('\n', '\\n').replace('\t', '\\t')
+        print('          JSON ', value[0:120])
+        return '"'+value+'"'
 
     @staticmethod
     def parse(string:Str) -> Eval:
