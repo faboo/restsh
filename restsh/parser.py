@@ -7,12 +7,16 @@ from .evaluate import Eval, Variable, ObjectRef, Define, Float, Integer, String,
     , IfThen, Describe, Exit, TryException, Group, Block
 
 class EndOfTokens(Exception):
-    pass
+    def __init__(self, inside:'Production') -> None:
+        super().__init__()
+        self.inside = inside
 
 class ParseError(Exception):
-    def __init__(self, tokens:List[Union[Type[Token], Type[Eval]]]) -> None:
+    def __init__(self, inside:'Production', tokens:List[Union[Type[Token], Type[Eval]]], endOfTokens:bool) -> None:
         super().__init__()
+        self.inside = inside
         self.tokens = tokens
+        self.endOfTokens = endOfTokens
 
 
 Rule = Tuple[Type[Eval], List[Union['Production', Type[Token], Type[Eval]]]]
@@ -41,19 +45,21 @@ class Production:
             stack:ParseStack,
             recursed:List[Tuple['Production',int]]
             , offset
-            ) -> Tuple[Eval, ParseStack]:
+            ) -> Tuple[Eval, ParseStack, bool]:
 
         #print(' '*offset, 'parsing ', stack[0], ' with rule ', rule)
 
+        eot = False
         parsed:List[Union[Eval, Token]] = []
 
         for pat in rule[1]:
             if not stack:
-                #print(' > EOT %s' % rule[1])
-                raise EndOfTokens()
+                print(f' > EOT {self.name}: {rule[1]}')
+                raise EndOfTokens(self)
 
             if isinstance(pat, Production):
-                result, stack = pat.parse(stack, recursed, offset+1)
+                result, stack, endOfTokens = pat.parse(stack, recursed, offset+1)
+                eot = eot or endOfTokens
             elif isinstance(stack[0], cast(Type[Any], pat)):
                 #if isinstance(stack[0], Eval):
                     #print('Matched eval %s %s'% (stack[0], pat))
@@ -62,19 +68,20 @@ class Production:
                 recursed = []
                 #print('    %s' % stack)
             else:
-                raise ParseError([pat])
+                raise ParseError(self, [pat], eot)
 
             parsed.append(result)
 
-        #print('Parsing ', rule[0])
-        return (rule[0].parse(*parsed), stack) #type:ignore
+        print('Parsing ', rule[0])
+        return (rule[0].parse(*parsed), stack, eot) #type:ignore
 
 
-    def parseRight(self, stack:ParseStack, recursed:List[Tuple['Production',int]], offset) -> Tuple[Eval, ParseStack]:
+    def parseRight(self, stack:ParseStack, recursed:List[Tuple['Production',int]], offset
+            ) -> Tuple[Eval, ParseStack, bool]:
         eot = False
         error = []
-        matches:List[Tuple[Eval, ParseStack]] = []
-        longestMatch:Optional[Tuple[Eval, ParseStack]] = None
+        #matches:List[Tuple[Eval, ParseStack]] = []
+        longestMatch:Optional[Tuple[Eval, ParseStack, bool]] = None
         #print(' '*offset, '%s (%s): %s' % (self.name or 'TOKENS', recursed, stack))
 
         for rule, index in zip(self.rules, range(len(self.rules))):
@@ -83,45 +90,57 @@ class Production:
                     continue
 
                 if isinstance(rule, Production):
-                    matches.append(rule.parse(stack, [(self, index), *recursed], offset+1))
+                    #matches.append(rule.parse(stack, [(self, index), *recursed], offset+1))
+                    match = rule.parse(stack, [(self, index), *recursed], offset+1)
                 else:
-                    matches.append(self.parseRule(rule, stack, [(self, index), *recursed], offset+1))
+                    #matches.append(self.parseRule(rule, stack, [(self, index), *recursed], offset+1))
+                    match = self.parseRule(rule, stack, [(self, index), *recursed], offset+1)
 
                 # If we ran out of tokens, this *is* the longest match
-                if matches and not matches[-1][1]:
+                if not match[1]:
+                    print(f'Ran out of tokens {self.name}, no exception: {match}')
+                    longestMatch = match
                     break
+
+                if match[2]:
+                    eot = True
+
+                if not longestMatch:
+                    longestMatch = match
+                elif len(longestMatch[1]) < len(match[1]):
+                    longestMatch = match
 
             except ParseError as ex:
                 error.append(ex)
+                eot = eot or ex.endOfTokens
             except EndOfTokens:
+                print('Setting EOT in ', self.name)
                 eot = True
 
-        if not matches:
-            if eot:
-                raise EndOfTokens()
-            
+        # If there is either no matching rule, or the matching rule leaves items on the stack
+        if not longestMatch:
             tokens:List[Union[Type[Token], Type[Eval]]] = []
 
             for err in error:
                 tokens = tokens + err.tokens
 
-            raise ParseError(tokens)
+            raise ParseError(self, tokens, eot)
 
-        for match in matches:
-            # smallest leftover token list, means longest match
-            # but take the *first* of the smallest matches
-            #pylint: disable=unsubscriptable-object
-            if longestMatch is None or len(longestMatch[1]) > len(match[1]):
-                longestMatch = match
+        elif longestMatch[1] and eot:
+            print(" -> END OF TOKENS %s" % self.name)
+            raise EndOfTokens(self)
 
-        #print(' '*offset, '-> %s' % (longestMatch,))
+        if eot:
+            print(f'Match but EOT, {self.name}: {longestMatch}')
 
-        return cast(Tuple[Eval, ParseStack], longestMatch)
+        print(' '*offset, '-> lM %s' % (longestMatch,))
+
+        return cast(Tuple[Eval, ParseStack, bool], longestMatch)
 
 
-    def parse(self, stack:ParseStack, recursed:List[Tuple['Production',int]], offset) -> Tuple[Eval, ParseStack]:
-        fullResult:Optional[Tuple[Eval, ParseStack]] = None
-        result:Optional[Eval] = None
+    # TODO: Named tuple result? Class?
+    def parse(self, stack:ParseStack, recursed:List[Tuple['Production',int]], offset) -> Tuple[Eval, ParseStack, bool]:
+        fullResult:Optional[Tuple[Eval, ParseStack], bool] = None
 
         # This loop essentially implements a non-advancing transition, in the special case of left recursion (without a
         # start symbol).
@@ -130,18 +149,24 @@ class Production:
         try:
             while stack:
                 #print('Parsing %s with stack %s' % (self, stack))
-                result, stack = self.parseRight(stack, recursed, offset)
-                fullResult = (result, list(stack))
+                result, stack, endOfTokens = self.parseRight(stack, recursed, offset)
+                fullResult = (result, list(stack), endOfTokens)
                 #print('storing full result: ', fullResult)
 
-                stack.insert(0, result)
+                if not endOfTokens:
+                    stack.insert(0, result)
                 #print('%s read interim result %s (%s); reparsing: %s' % (self, result, result.__class__, stack))
-        except:
+        except EndOfTokens as ex:
+            if not fullResult:
+                print(f'Unwinding end of tokens:  {ex.inside.name}')
+                raise
+        except Exception as ex:
+            print(f'ex: {ex.__class__}, {ex.inside.name}, {ex.endOfTokens}, {ex.tokens}')
             if not fullResult:
                 raise
-            #print(' -> %s returning fullResult %s' % (self, fullResult))
 
-        return cast(Tuple[Eval, ParseStack], fullResult)
+        print(f'* Returning {self.name} parse result {fullResult}')
+        return cast(Tuple[Eval, ParseStack, bool], fullResult)
 
 
     def __repr__(self) -> str:
@@ -334,11 +359,13 @@ def parse(tokens:List[Token]) -> List[Eval]:
     results = []
     stack = cast(ParseStack, tokens)
 
-    result, stack = statement.parse(stack, [], 0)
+    result, stack, endOfTokens = statement.parse(stack, [], 0)
 
     if stack:
-        raise ParseError([])
+        print('Raising ParseError because of left-over stack; endOfTokens: ', endOfTokens)
+        raise ParseError(None, [], endOfTokens)
 
     results.append(result)
 
     return results
+

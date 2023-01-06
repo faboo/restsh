@@ -55,14 +55,16 @@ class Service:
 
 
     def fillTemplate(self, template:str, parameters:dict, arguments:dict) -> str:
-        string = template
+        strings = template.split('$$')
 
-        for param in parameters.keys():
-            arg = arguments.get(param, '')
-            string = re.sub(r'(?<!\$)\$' + param + r'\$(?!\$)', str(arg), string)
+
+        for index in range(len(strings)):
+            for param in parameters.keys():
+                arg = arguments.get(param, '')
+                strings[index] = re.sub(r'\$' + param + r'\$', str(arg), strings[index])
 
         #print('filled template: ', string)
-        return string
+        return '$'.join(strings)
 
 
     def fillCall(self, callDef, templ) -> None:

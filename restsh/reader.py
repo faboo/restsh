@@ -56,7 +56,7 @@ def tabCompleter(environment:Environment, text:str, state:int) -> Optional[str]:
                 suggestions = [prefix+'.'+key for key in obj.properties if key.startswith(lastRef)]
 
     except Exception as ex:
-        print('ex; %s' % ex)
+        print('ex: %s' % ex)
     
     if state < len(suggestions):
         return suggestions[state]

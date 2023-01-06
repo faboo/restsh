@@ -9,6 +9,7 @@ from . import builtins
 from . import operators
 from . import http
 from . import time
+from . import file
 from . import describe
 from . import parser
 
@@ -84,6 +85,7 @@ def main(args:list=None):
     operators.register(environment)
     http.register(environment)
     time.register(environment)
+    file.register(environment)
 
     if not arguments.skip_rc and os.path.exists(rcfile):
         with open(rcfile, 'r', encoding='utf-8') as rsource:

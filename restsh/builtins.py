@@ -172,6 +172,19 @@ def bRreduce(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return accum
 
 
+@add('do', {'fn': 'function[]'}, 'Call a function until it returns false')
+def bDo(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+    func = cast(Function, args['fn'])
+
+    while True:
+        result = func.call(environment, { })
+
+        if not result.toPython():
+            break
+
+    return Null()
+
+
 @add('string', {'value': 'any'}, 'Convert a value into a string')
 def bString(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     value = args['value']

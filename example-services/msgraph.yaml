@@ -15,6 +15,22 @@ call:
       transform: |
         response.value
 
+  - name: folders
+    params:
+      mboxId: string
+      folder: string
+    path: /v1.0/users/$mboxId$/MailFolders/$folder$/childFolders?$$top=500&$$count=true
+    method: GET
+    response:
+      type: json
+
+  - name: deleteFolder
+    params:
+      mboxId: string
+      folderId: string
+    path: /v1.0/users/$mboxId$/mailFolders/$folderId$
+    method: DELETE
+
   - name: users
     path: /v1.0/users?$top=999
     method: GET
