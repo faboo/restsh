@@ -28,7 +28,7 @@ class Cell:
         return repr(self.value)
 
 class Environment:
-    def __init__(self, base:'Environment'=None) -> None:
+    def __init__(self, base:Optional['Environment']=None) -> None:
         #print('environment: %s (base? %s)' % (id(self), base is not None))
         self.base = base
         self.loop:bool = True

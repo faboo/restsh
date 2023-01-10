@@ -267,7 +267,7 @@ def bJoin(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
 
 
 @add('tojson', {'val': 'any'}, 'Convert ')
-def bTojson(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
+def bTojson(environment:Environment, args:Dict[str,Eval]) -> str:
     val = args['val']
     return val.toJson() #String(json.dumps(val.toPython()))
 

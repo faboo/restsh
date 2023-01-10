@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-virtualenv -p python3.9 -q venv
+virtualenv -p python3 -q venv
 
 source venv/bin/activate
 

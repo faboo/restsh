@@ -1,6 +1,7 @@
 import argparse
 import sys
 import os
+from typing import Optional
 from .environment import Environment
 from .repl import repLoop
 from .reader import tabCompleter
@@ -55,7 +56,7 @@ def printVersion() -> None:
     sys.exit(1)
 
 
-def main(args:list=None):
+def main(args:Optional[list]=None):
     arguments = setupArguments(args or sys.argv[1:])
     historyName = os.path.expanduser('~/.restsh_history')
     rcfile = os.path.expanduser('~/.restshrc')

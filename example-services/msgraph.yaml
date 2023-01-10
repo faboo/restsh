@@ -32,7 +32,27 @@ call:
     method: DELETE
 
   - name: users
-    path: /v1.0/users?$top=999
+    path: /v1.0/users?$$top=999
+    method: GET
+    response:
+      type: json
+      transform: |
+        response.value
+
+  - name: searchGroups
+    path: /v1.0/groups/?$$search(mail+eq+'$mboxId$')
+    params:
+      mboxId: string
+    method: GET
+    response:
+      type: json
+      transform: |
+        response.value
+
+  - name: groupMembers
+    path: /v1.0/groups/$id$/members
+    params:
+      id: string
     method: GET
     response:
       type: json
@@ -55,3 +75,5 @@ call:
     method: GET
     response:
       type: json
+
+

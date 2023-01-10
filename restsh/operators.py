@@ -75,7 +75,7 @@ def bLessThan(left:Union[int,float], right:Union[int,float]) -> bool:
 
 
 @add('>', ('number', 'number'))
-def bLessThan(left:Union[int,float], right:Union[int,float]) -> bool:
+def bGreaterThan(left:Union[int,float], right:Union[int,float]) -> bool:
     return left > right
 
 
