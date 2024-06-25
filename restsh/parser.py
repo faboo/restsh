@@ -54,7 +54,7 @@ class Production:
 
         for pat in rule[1]:
             if not stack:
-                print(f' > EOT {self.name}: {rule[1]}')
+                #print(f' > EOT {self.name}: {rule[1]}')
                 raise EndOfTokens(self)
 
             if isinstance(pat, Production):
@@ -72,7 +72,6 @@ class Production:
 
             parsed.append(result)
 
-        print('Parsing ', rule[0])
         return (rule[0].parse(*parsed), stack, eot) #type:ignore
 
 
@@ -114,7 +113,7 @@ class Production:
                 error.append(ex)
                 eot = eot or ex.endOfTokens
             except EndOfTokens:
-                print('Setting EOT in ', self.name)
+                #print('Setting EOT in', self.name)
                 eot = True
 
         # If there is either no matching rule, or the matching rule leaves items on the stack
@@ -127,13 +126,13 @@ class Production:
             raise ParseError(self, tokens, eot)
 
         elif longestMatch[1] and eot:
-            print(" -> END OF TOKENS %s" % self.name)
+            print(" -> END OF TOKENS %s, %s" % (self.name, longestMatch))
             raise EndOfTokens(self)
 
         if eot:
             print(f'Match but EOT, {self.name}: {longestMatch}')
 
-        print(' '*offset, '-> lM %s' % (longestMatch,))
+        #print(' '*offset, '-> lM %s' % (longestMatch,))
 
         return cast(Tuple[Eval, ParseStack, bool], longestMatch)
 
@@ -157,11 +156,14 @@ class Production:
                     stack.insert(0, result)
                 #print('%s read interim result %s (%s); reparsing: %s' % (self, result, result.__class__, stack))
         except EndOfTokens as ex:
+            print('End of tokens')
             if not fullResult:
-                print(f'Unwinding end of tokens:  {ex.inside.name}')
+                print(f'Unwinding end of tokens:  {ex.inside.name}, stack: {fullResult and fullResult[1]}')
                 raise
+            elif fullResult[1]:
+                raise ParseError(self, [], True)
         except Exception as ex:
-            print(f'ex: {ex.__class__}, {ex.inside.name}, {ex.endOfTokens}, {ex.tokens}')
+            print(f'ex: {ex.__class__}, {ex.inside.name}, {ex.endOfTokens}')
             if not fullResult:
                 raise
 
@@ -363,6 +365,7 @@ def parse(tokens:List[Token]) -> List[Eval]:
 
     if stack:
         print('Raising ParseError because of left-over stack; endOfTokens: ', endOfTokens)
+        print('stack: %s', stack)
         raise ParseError(None, [], endOfTokens)
 
     results.append(result)

@@ -47,10 +47,8 @@ def repLoop(environment:Environment) -> Eval:
 
             if tokens:
                 try:
-                    #print('parsing')
                     exprs = parser(tokens)
                     tokens = []
-                    #print('expression: %s' % exprs)
                 except ParseError as ex:
                     if ex.endOfTokens:
                         print('ParseError end of tokens True')
@@ -90,7 +88,7 @@ def repLoop(environment:Environment) -> Eval:
                             environment.print('%s' % repr(result))
                             terminal.reset(environment.output)
                         environment.lastResult = result
-                except EvaluationError:
+                except EvaluationError as ex:
                     pass
                 except Exception as ex:
                     terminal.setForeground(environment.output, 'red')
