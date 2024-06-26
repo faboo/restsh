@@ -19,6 +19,10 @@ class ParseError(Exception):
         self.endOfTokens = endOfTokens
 
 
+class PartialParseError(EndOfTokens):
+    pass
+
+
 Rule = Tuple[Type[Eval], List[Union['Production', Type[Token], Type[Eval]]]]
 ParseStack = List[Union[Eval, Token]]
 
@@ -49,13 +53,16 @@ class Production:
 
         #print(' '*offset, 'parsing ', stack[0], ' with rule ', rule)
 
+        parsedAny = False
         eot = False
         parsed:List[Union[Eval, Token]] = []
 
         for pat in rule[1]:
             if not stack:
                 #print(f' > EOT {self.name}: {rule[1]}')
-                raise EndOfTokens(self)
+                raise PartialParseError(self)
+
+            parsedAny = True
 
             if isinstance(pat, Production):
                 result, stack, endOfTokens = pat.parse(stack, recursed, offset+1)
@@ -78,6 +85,7 @@ class Production:
     def parseRight(self, stack:ParseStack, recursed:List[Tuple['Production',int]], offset
             ) -> Tuple[Eval, ParseStack, bool]:
         eot = False
+        partial:PartialParseError|None = None
         error = []
         #matches:List[Tuple[Eval, ParseStack]] = []
         longestMatch:Optional[Tuple[Eval, ParseStack, bool]] = None
@@ -109,6 +117,8 @@ class Production:
                 elif len(longestMatch[1]) < len(match[1]):
                     longestMatch = match
 
+            except PartialParseError as ex:
+                partial = ex
             except ParseError as ex:
                 error.append(ex)
                 eot = eot or ex.endOfTokens
@@ -118,6 +128,9 @@ class Production:
 
         # If there is either no matching rule, or the matching rule leaves items on the stack
         if not longestMatch:
+            if partial:
+                raise partial
+
             tokens:List[Union[Type[Token], Type[Eval]]] = []
 
             for err in error:
@@ -127,7 +140,12 @@ class Production:
 
         elif longestMatch[1] and eot:
             print(" -> END OF TOKENS %s, %s" % (self.name, longestMatch))
-            raise EndOfTokens(self)
+            if partial:
+                raise partial
+            else:
+                print(' -> Creating new partial parse error')
+                raise PartialParseError(self)
+            #raise EndOfTokens(self)
 
         if eot:
             print(f'Match but EOT, {self.name}: {longestMatch}')
@@ -349,8 +367,8 @@ statement = Production(
     describe,
     ext,
     imprt,
-    define,
     assignment,
+    define,
     expression,
     name='statement'
     )

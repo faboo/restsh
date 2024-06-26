@@ -5,7 +5,7 @@ from . import terminal
 from .environment import Environment, EvaluationError, Cell
 from .token import Token
 from .reader import read, EndOfFile, UntokenizableError
-from .parser import parse, ParseError, EndOfTokens, statement
+from .parser import parse, ParseError, PartialParseError, EndOfTokens, statement
 from . import tableParser
 from .evaluate import Eval
 
@@ -35,7 +35,7 @@ def repLoop(environment:Environment) -> Eval:
         try:
             try:
                 tokens = read(environment, previousTokens)
-                #print('tokenized: %s' % tokens)
+                print('tokenized: %s' % tokens)
             except EndOfFile:
                 if previousTokens and environment.interactive:
                     previousTokens = []
@@ -49,6 +49,8 @@ def repLoop(environment:Environment) -> Eval:
                 try:
                     exprs = parser(tokens)
                     tokens = []
+                except PartialParseError:
+                    print('Got PartialParseError')
                 except ParseError as ex:
                     if ex.endOfTokens:
                         print('ParseError end of tokens True')

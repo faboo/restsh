@@ -65,7 +65,7 @@ class Flt(Token): pass
 class Int(Token): pass
 
 tokens:List[Tuple[Type[Token], re.Pattern]] = \
-    [ (Eq, re.compile(r'=(?=\s|\w)'))
+    [ (Eq, re.compile(r':='))
     , (Dot, re.compile(r'\.'))
     , (LParen, re.compile(r'\('))
     , (RParen, re.compile(r'\)'))
