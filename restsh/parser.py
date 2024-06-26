@@ -53,16 +53,14 @@ class Production:
 
         #print(' '*offset, 'parsing ', stack[0], ' with rule ', rule)
 
-        parsedAny = False
         eot = False
         parsed:List[Union[Eval, Token]] = []
 
         for pat in rule[1]:
+            # If we have pattern left, and our token/Eval stack is empty, then we have a partial parse
             if not stack:
                 #print(f' > EOT {self.name}: {rule[1]}')
                 raise PartialParseError(self)
-
-            parsedAny = True
 
             if isinstance(pat, Production):
                 result, stack, endOfTokens = pat.parse(stack, recursed, offset+1)
@@ -74,6 +72,7 @@ class Production:
                 stack = stack[1:]
                 recursed = []
                 #print('    %s' % stack)
+            # This token/Eval doesn't match this part of the pattern
             else:
                 raise ParseError(self, [pat], eot)
 
@@ -118,18 +117,21 @@ class Production:
                     longestMatch = match
 
             except PartialParseError as ex:
+                # We ran out of tokens mid-parse, so if we don't have a complete parse, this would be the longest parse
                 partial = ex
             except ParseError as ex:
                 error.append(ex)
-                eot = eot or ex.endOfTokens
             except EndOfTokens:
                 #print('Setting EOT in', self.name)
                 eot = True
 
         # If there is either no matching rule, or the matching rule leaves items on the stack
         if not longestMatch:
+            # We had a partial match
             if partial:
                 raise partial
+
+            # Otherwise, collect our expected tokens for a parse error
 
             tokens:List[Union[Type[Token], Type[Eval]]] = []
 
@@ -138,17 +140,10 @@ class Production:
 
             raise ParseError(self, tokens, eot)
 
-        elif longestMatch[1] and eot:
+        # Our longest match leaves tokens/Evel left to parse
+        elif longestMatch[1] and partial:
             print(" -> END OF TOKENS %s, %s" % (self.name, longestMatch))
-            if partial:
-                raise partial
-            else:
-                print(' -> Creating new partial parse error')
-                raise PartialParseError(self)
-            #raise EndOfTokens(self)
-
-        if eot:
-            print(f'Match but EOT, {self.name}: {longestMatch}')
+            raise partial
 
         #print(' '*offset, '-> lM %s' % (longestMatch,))
 
@@ -180,7 +175,7 @@ class Production:
                 raise
             elif fullResult[1]:
                 raise ParseError(self, [], True)
-        except Exception as ex:
+        except ParseError as ex:
             print(f'ex: {ex.__class__}, {ex.inside.name}, {ex.endOfTokens}')
             if not fullResult:
                 raise
