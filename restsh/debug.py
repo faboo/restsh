@@ -3,7 +3,7 @@ from . import terminal
 
 showDebug = False
 
-def debug(*strings:list[str]) -> None:
+def debug(*strings:str) -> None:
     if showDebug:
         terminal.setBackground(sys.stdout, 'purple')
         print('   ', end='')

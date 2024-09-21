@@ -90,7 +90,7 @@ class ElementList(Eval):
         return 'EL['+(', '.join('%s' % repr(elm) for elm in self.elements))+']'
 
     @staticmethod
-    def parse(elmList:Union['ElementList',Eval]=None, _:Comma=None, elm:Eval=None) -> Eval:
+    def parse(elmList:'ElementList'|Eval|None=None, _:Comma|None=None, elm:Eval|None=None) -> Eval:
         elements:List[Eval] = []
 
         if isinstance(elmList, ElementList):
@@ -105,7 +105,7 @@ class ElementList(Eval):
 
 
 class Object(Eval):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.description:Optional[str] = None
 
@@ -142,7 +142,7 @@ class Array(Eval):
         return [elm.toPython() for elm in self.elements]
 
     @staticmethod
-    def parse(_:LBracket, elements:ElementList, __:RBracket=None) -> Eval:
+    def parse(_:LBracket, elements:ElementList, __:RBracket|None=None) -> Eval:
         if isinstance(elements, RBracket):
             return Array([])
         else:
@@ -181,7 +181,7 @@ class ParamList(Eval):
         return ', '.join(self.params)
 
     @staticmethod
-    def parse(paramList:Union['ParamList',Sym], _:Comma=None, param:Sym=None) -> Eval:
+    def parse(paramList:Union['ParamList',Sym], _:Comma|None=None, param:Sym|None=None) -> Eval:
         params:List[str] = []
 
         if isinstance(paramList, ParamList):
@@ -389,7 +389,7 @@ class ArgList(Eval):
         return ', '.join('%s: %s' % (key, repr(arg)) for key, arg in self.args.items())
 
     @staticmethod
-    def parse(argList:Union['ArgList',Arg], _:Comma=None, arg:Arg=None) -> Eval:
+    def parse(argList:Union['ArgList',Arg], _:Comma|None=None, arg:Arg|None=None) -> Eval:
         args:Dict[str,Eval] = {**argList.args }
 
         if isinstance(arg, Arg):
@@ -762,7 +762,7 @@ class Import(Eval):
 
 
 class Describe(Eval):
-    def __init__(self, what:Eval=None) -> None:
+    def __init__(self, what:Eval|None=None) -> None:
         self.what = what
 
     def __repr__(self) -> str:

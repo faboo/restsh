@@ -12,7 +12,7 @@ class EndOfTokens(Exception):
         self.inside = inside
 
 class ParseError(Exception):
-    def __init__(self, inside:'Production', tokens:List[Union[Type[Token], Type[Eval]]], endOfTokens:bool) -> None:
+    def __init__(self, inside:'Production'|None, tokens:List[Union[Type[Token], Type[Eval]]], endOfTokens:bool) -> None:
         super().__init__()
         self.inside = inside
         self.tokens = tokens
@@ -150,7 +150,7 @@ class Production:
 
 
     def parse(self, stack:ParseStack, recursed:List[Tuple['Production',int]], offset) -> Tuple[Eval, ParseStack, bool]:
-        fullResult:Optional[Tuple[Eval, ParseStack], bool] = None
+        fullResult:Tuple[Eval, ParseStack, bool]|None = None
 
         # This loop essentially implements a non-advancing transition, in the special case of left recursion (without a
         # start symbol).
