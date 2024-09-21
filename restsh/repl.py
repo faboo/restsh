@@ -8,6 +8,7 @@ from .reader import read, EndOfFile, UntokenizableError
 from .parser import parse, ParseError, PartialParseError, EndOfTokens, statement
 from . import tableParser
 from .evaluate import Eval
+from .debug import debug
 
 def printable(value:Eval) -> bool:
     if isinstance(value, Cell):
@@ -35,7 +36,7 @@ def repLoop(environment:Environment) -> Eval:
         try:
             try:
                 tokens = read(environment, previousTokens)
-                #print('tokenized: %s' % tokens)
+                debug('tokenized: %s' % tokens)
             except EndOfFile:
                 if previousTokens and environment.interactive:
                     previousTokens = []

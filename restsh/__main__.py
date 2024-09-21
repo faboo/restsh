@@ -12,6 +12,7 @@ from . import time
 from . import file
 from . import describe
 from . import parser
+from . import debug
 
 def setupArguments(args:list) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -19,8 +20,8 @@ def setupArguments(args:list) -> argparse.Namespace:
         description='REST and RPC processing shell.')
     parser.add_argument('--environment', '-e', action='append', default=[])
     parser.add_argument('--skip-rc', '-s', action='store_true', default=False)
-    parser.add_argument('--ng-parser', action='store_true', default=False)
-    parser.add_argument('--debug-errors', action='store_true', default=False)
+    #parser.add_argument('--ng-parser', action='store_true', default=False)
+    parser.add_argument('--debug-internals', action='store_true', default=False)
     parser.add_argument('--version', action='store_true', default=False)
     parser.add_argument('script', nargs='?')
     parser.add_argument('scriptargs', nargs='*')
@@ -52,6 +53,11 @@ def writeHistory() -> None:
 
 def printVersion() -> None:
     print("REST Shell v1.0")
+    print("Copyright (C) 2024 Raymond W. Wallace III")
+    print("License GPLv2: GNU GPL version 2 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>")
+    print("")
+    print("This is free software; you are free to change and redistribute it.")
+    print("There is NO WARRANTY, to the extent permitted by law.")
     sys.exit(1)
 
 
@@ -70,7 +76,8 @@ def main(args:list=None):
     environment = Environment()
 
     environment.ngParser = arguments.ng_parser
-    environment.debugErrors = arguments.debug_errors
+    environment.debugErrors = arguments.debug_internals
+    debug.showDebug = arguments.debug_internals
 
     environment.setVariable('args', wrap(arguments.scriptargs))
     environment.setVariable('__result', Null())

@@ -392,7 +392,7 @@ Restsh uses the amqp package for AMQP 0-9 support. However, it is not a hard
 requirement. If you want to define AMQP-based services, you will need to
 pip-install amqp separately.
 
-Services using the `amqp` protocol only support `basic` authentication (or none).
+Services using the `amqp` protocol only supports `basic` authentication (or none).
 
 Header values for AMQP calls may be integers and floats in addition to strings.
 
@@ -419,3 +419,12 @@ $
 ```
 
 Arguments passed to the script on the command line are stored as an array of strings in the `args` top-level variable.
+
+
+# Copyright
+
+REST Shell is copyright 2024 Raymond W. Wallace III
+
+You may copy or modify it under the terms of the [GNU Public License version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
+
+
