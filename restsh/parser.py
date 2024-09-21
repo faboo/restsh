@@ -12,7 +12,7 @@ class EndOfTokens(Exception):
         self.inside = inside
 
 class ParseError(Exception):
-    def __init__(self, inside:'Production'|None, tokens:List[Union[Type[Token], Type[Eval]]], endOfTokens:bool) -> None:
+    def __init__(self, inside:Optional['Production'], tokens:List[Union[Type[Token], Type[Eval]]], endOfTokens:bool) -> None:
         super().__init__()
         self.inside = inside
         self.tokens = tokens

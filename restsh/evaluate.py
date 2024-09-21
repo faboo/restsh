@@ -90,7 +90,7 @@ class ElementList(Eval):
         return 'EL['+(', '.join('%s' % repr(elm) for elm in self.elements))+']'
 
     @staticmethod
-    def parse(elmList:'ElementList'|Eval|None=None, _:Comma|None=None, elm:Eval|None=None) -> Eval:
+    def parse(elmList:Union['ElementList',Eval,None]=None, _:Comma|None=None, elm:Eval|None=None) -> Eval:
         elements:List[Eval] = []
 
         if isinstance(elmList, ElementList):

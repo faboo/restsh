@@ -3,7 +3,7 @@ PROJECT=restsh
 
 set -e
 set -o pipefail
-source venv/bin/activate
+source .venv/bin/activate
 python -m compileall -l .
 mypy -p $PROJECT
 pylint $PROJECT/*.py #$PROJECT/*/*.py
