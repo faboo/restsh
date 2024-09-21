@@ -85,7 +85,7 @@ class Environment:
             return self.variables[name]
         else:
             if name not in self.variables:
-                self.error('Undefined variable: %s' % name)
+                self.error('Undefined variable: \'%s\'' % name)
             return self.variables[name]
         
 

@@ -5,9 +5,10 @@ from . import terminal
 from .environment import Environment, EvaluationError, Cell
 from .token import Token
 from .reader import read, EndOfFile, UntokenizableError
-from .parser import parse, ParseError, EndOfTokens, statement
+from .parser import parse, ParseError, PartialParseError, EndOfTokens, statement
 from . import tableParser
 from .evaluate import Eval
+from .debug import debug
 
 def printable(value:Eval) -> bool:
     if isinstance(value, Cell):
@@ -35,7 +36,7 @@ def repLoop(environment:Environment) -> Eval:
         try:
             try:
                 tokens = read(environment, previousTokens)
-                #print('tokenized: %s' % tokens)
+                debug('tokenized: %s' % tokens)
             except EndOfFile:
                 if previousTokens and environment.interactive:
                     previousTokens = []
@@ -47,19 +48,30 @@ def repLoop(environment:Environment) -> Eval:
 
             if tokens:
                 try:
-                    #print('parsing')
                     exprs = parser(tokens)
                     tokens = []
-                    #print('expression: %s' % exprs)
+                except PartialParseError:
+                    #print('Got PartialParseError')
+                    pass
                 except ParseError as ex:
-                    terminal.setForeground(environment.output, 'red')
-                    environment.print(
-                        'parse error, expected one of: %s' % \
-                        ', '.join([token.__name__ for token in set(ex.tokens)]))
-                    terminal.reset(environment.output)
-                    tokens = []
+                    if ex.endOfTokens:
+                        #print('ParseError end of tokens True')
+                        if previousTokens == tokens:
+                            terminal.setForeground(environment.output, 'red')
+                            environment.print('parse error')
+                            terminal.reset(environment.output)
+                            tokens = []
+                        else:
+                            continue
+                    else:
+                        terminal.setForeground(environment.output, 'red')
+                        environment.print(
+                            'parse error, expected one of: %s' % \
+                            ', '.join([token.__name__ for token in set(ex.tokens)]))
+                        terminal.reset(environment.output)
+                        tokens = []
                 except EndOfTokens:
-                    print('END OF TOKENS')
+                    #print('END OF TOKENS')
                     if previousTokens == tokens:
                         terminal.setForeground(environment.output, 'red')
                         environment.print('parse error')
@@ -80,7 +92,7 @@ def repLoop(environment:Environment) -> Eval:
                             environment.print('%s' % repr(result))
                             terminal.reset(environment.output)
                         environment.lastResult = result
-                except EvaluationError:
+                except EvaluationError as ex:
                     pass
                 except Exception as ex:
                     terminal.setForeground(environment.output, 'red')
