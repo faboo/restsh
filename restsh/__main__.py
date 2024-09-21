@@ -76,7 +76,7 @@ def main(args:Optional[list]=None):
 
     environment = Environment()
 
-    environment.ngParser = arguments.ng_parser
+    #environment.ngParser = arguments.ng_parser
     environment.debugErrors = arguments.debug_internals
     debug.showDebug = arguments.debug_internals
 
