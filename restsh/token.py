@@ -65,7 +65,7 @@ class Flt(Token): pass
 class Int(Token): pass
 
 tokens:List[Tuple[Type[Token], re.Pattern]] = \
-    [ (Eq, re.compile(r':='))
+    [ (Eq, re.compile(r'=($|\b|(?=\s))')) # EOT isn't a boundary??
     , (Dot, re.compile(r'\.'))
     , (LParen, re.compile(r'\('))
     , (RParen, re.compile(r'\)'))

@@ -19,12 +19,15 @@ class ParseError(Exception):
         self.endOfTokens = endOfTokens
 
 
-class PartialParseError(EndOfTokens):
-    pass
+class PartialParseError(Exception):
+    def __init__(self, inside:'Production') -> None:
+        super().__init__()
+        self.inside = inside
 
 
 Rule = Tuple[Type[Eval], List[Union['Production', Type[Token], Type[Eval]]]]
 ParseStack = List[Union[Eval, Token]]
+
 
 class Production:
     def __init__(self, *rules:Union['Production', Rule], **kwargs) -> None:
@@ -48,30 +51,34 @@ class Production:
             rule:Rule,
             stack:ParseStack,
             recursed:List[Tuple['Production',int]]
-            , offset
-            ) -> Tuple[Eval, ParseStack, bool]:
+            , offset:int
+            ) -> Parsing:
 
         #print(' '*offset, 'parsing ', stack[0], ' with rule ', rule)
 
         eot = False
         parsed:List[Union[Eval, Token]] = []
+        openParse = False
 
         for pat in rule[1]:
             # If we have pattern left, and our token/Eval stack is empty, then we have a partial parse
             if not stack:
-                #print(f' > EOT {self.name}: {rule[1]}')
-                raise PartialParseError(self)
+                print(f' > EOT {self.name}: {pat}')
+                if openParse:
+                    raise PartialParseError(self)
+                else:
+                    raise EndOfTokens(self)
 
             if isinstance(pat, Production):
                 result, stack, endOfTokens = pat.parse(stack, recursed, offset+1)
                 eot = eot or endOfTokens
             elif isinstance(stack[0], cast(Type[Any], pat)):
-                #if isinstance(stack[0], Eval):
-                    #print('Matched eval %s %s'% (stack[0], pat))
+                if issubclass(pat, Token):
+                    openParse = True
+
                 result = stack[0]
                 stack = stack[1:]
                 recursed = []
-                #print('    %s' % stack)
             # This token/Eval doesn't match this part of the pattern
             else:
                 raise ParseError(self, [pat], eot)
@@ -81,14 +88,12 @@ class Production:
         return (rule[0].parse(*parsed), stack, eot) #type:ignore
 
 
-    def parseRight(self, stack:ParseStack, recursed:List[Tuple['Production',int]], offset
+    def parseRight(self, stack:ParseStack, recursed:List[Tuple['Production',int]], offset:int
             ) -> Tuple[Eval, ParseStack, bool]:
         eot = False
         partial:PartialParseError|None = None
         error = []
-        #matches:List[Tuple[Eval, ParseStack]] = []
         longestMatch:Optional[Tuple[Eval, ParseStack, bool]] = None
-        #print(' '*offset, '%s (%s): %s' % (self.name or 'TOKENS', recursed, stack))
 
         for rule, index in zip(self.rules, range(len(self.rules))):
             try:
@@ -96,29 +101,24 @@ class Production:
                     continue
 
                 if isinstance(rule, Production):
-                    #matches.append(rule.parse(stack, [(self, index), *recursed], offset+1))
                     match = rule.parse(stack, [(self, index), *recursed], offset+1)
                 else:
-                    #matches.append(self.parseRule(rule, stack, [(self, index), *recursed], offset+1))
                     match = self.parseRule(rule, stack, [(self, index), *recursed], offset+1)
-
-                # If we ran out of tokens, this *is* the longest match
-                if not match[1]:
-                    print(f'Ran out of tokens {self.name}, no exception: {match}')
-                    longestMatch = match
-                    break
 
                 if match[2]:
                     eot = True
 
                 if not longestMatch:
+                    print(' '*offset, f'setting longest match: {match}')
                     longestMatch = match
-                elif len(longestMatch[1]) < len(match[1]):
+                # the longest match is the one that leaves the least tokens
+                elif len(longestMatch[1]) > len(match[1]):
+                    print(' '*offset, f'updating longest match: {match}')
                     longestMatch = match
 
-            except PartialParseError as ex:
+            #except PartialParseError as ex:
                 # We ran out of tokens mid-parse, so if we don't have a complete parse, this would be the longest parse
-                partial = ex
+            #    partial = ex
             except ParseError as ex:
                 error.append(ex)
             except EndOfTokens:
@@ -158,6 +158,7 @@ class Production:
         # start symbol).
         # It's a little clunky, but it works.
 
+        print(' '*offset, f'@ Trying {self.name}')
         try:
             while stack:
                 #print('Parsing %s with stack %s' % (self, stack))
@@ -176,11 +177,11 @@ class Production:
             elif fullResult[1]:
                 raise ParseError(self, [], True)
         except ParseError as ex:
-            print(f'ex: {ex.__class__}, {ex.inside.name}, {ex.endOfTokens}')
+            #print(f'ex: {ex.__class__}, {ex.inside.name}, {ex.endOfTokens}')
             if not fullResult:
                 raise
 
-        print(f'* Returning {self.name} parse result {fullResult}')
+        print(' '*offset, f'* Returning {self.name} parse result {fullResult}')
         return cast(Tuple[Eval, ParseStack, bool], fullResult)
 
 
