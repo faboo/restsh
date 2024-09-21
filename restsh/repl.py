@@ -35,7 +35,7 @@ def repLoop(environment:Environment) -> Eval:
         try:
             try:
                 tokens = read(environment, previousTokens)
-                print('tokenized: %s' % tokens)
+                #print('tokenized: %s' % tokens)
             except EndOfFile:
                 if previousTokens and environment.interactive:
                     previousTokens = []
@@ -50,10 +50,11 @@ def repLoop(environment:Environment) -> Eval:
                     exprs = parser(tokens)
                     tokens = []
                 except PartialParseError:
-                    print('Got PartialParseError')
+                    #print('Got PartialParseError')
+                    pass
                 except ParseError as ex:
                     if ex.endOfTokens:
-                        print('ParseError end of tokens True')
+                        #print('ParseError end of tokens True')
                         if previousTokens == tokens:
                             terminal.setForeground(environment.output, 'red')
                             environment.print('parse error')
@@ -69,7 +70,7 @@ def repLoop(environment:Environment) -> Eval:
                         terminal.reset(environment.output)
                         tokens = []
                 except EndOfTokens:
-                    print('END OF TOKENS')
+                    #print('END OF TOKENS')
                     if previousTokens == tokens:
                         terminal.setForeground(environment.output, 'red')
                         environment.print('parse error')

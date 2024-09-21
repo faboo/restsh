@@ -2,6 +2,8 @@ from typing import Tuple, Type, List
 import re
 
 class Token:
+    openParse = True
+
     def __init__(self, text:str) -> None:
         self.text:str = text
 
@@ -42,7 +44,8 @@ class Let(Token): pass
 
 class Imp(Token): pass
 
-class Help(Token): pass
+class Help(Token):
+    openParse = False
 
 class Ext(Token): pass
 
@@ -54,15 +57,19 @@ class Then(Token): pass
 
 class Else(Token): pass
 
-class Sym(Token): pass
+class Sym(Token):
+    openParse = False
 
 class Op(Token): pass
 
-class Str(Token): pass
+class Str(Token):
+    openParse = False
 
-class Flt(Token): pass
+class Flt(Token):
+    openParse = False
 
-class Int(Token): pass
+class Int(Token):
+    openParse = False
 
 tokens:List[Tuple[Type[Token], re.Pattern]] = \
     [ (Eq, re.compile(r'=($|\b|(?=\s))')) # EOT isn't a boundary??
