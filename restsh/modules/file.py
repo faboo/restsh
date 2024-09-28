@@ -1,6 +1,6 @@
-from .moduleUtils import builtin
-from .evaluate import DictObject, wrap
-from .environment import EvaluationError
+from ..moduleUtils import builtin
+from ..evaluate import DictObject, wrap
+from ..environment import EvaluationError
 
 @builtin('read', {'file': 'string'}, 'Read a text file into a string')
 def bRead(environment, args):

@@ -420,7 +420,7 @@ Arguments passed to the script on the command line are stored as an array of str
 
 # Sessions
 
-You can save and load the current state of the shell with the `session` module.
+You can save and load the current state of the shell with the `session` object.
 
 To save the current session, use `session.save`, like so:
 
@@ -454,6 +454,7 @@ Additionally, you can clear the current session using `session.clear`:
 	$ print(text: string(value: tempF))
 	error: Undefined variable: 'tempF'
 
+The session management isn't perfect, but it should do the right thing most of the time.
 
 # Copyright
 

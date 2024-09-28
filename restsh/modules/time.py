@@ -2,8 +2,8 @@ from typing import cast, Union, Dict, Callable, Tuple, List, Optional, Any
 from datetime import datetime, timezone
 import dateutil.parser as dateparser
 import dateutil.tz
-from .environment import Environment, Cell
-from .evaluate import dereference, wrap, DictObject, Builtin, String, Constant, Eval
+from ..environment import Environment, Cell
+from ..evaluate import dereference, wrap, DictObject, Builtin, String, Constant, Eval
 
 class Time(Constant):
     def __init__(self, time:datetime) -> None:

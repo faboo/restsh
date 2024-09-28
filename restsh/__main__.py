@@ -6,11 +6,11 @@ from .environment import Environment
 from .repl import repLoop
 from .reader import tabCompleter
 from .evaluate import wrap, Null, Boolean
-from . import builtins
-from . import operators
-from . import http
-from . import time
-from . import file
+from .modules import builtins
+from .modules import operators
+from .modules import http
+from .modules import time
+from .modules import file
 from .modules import session
 from . import describe
 from . import parser

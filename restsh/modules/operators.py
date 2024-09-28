@@ -1,6 +1,6 @@
 from typing import cast, Union, Dict, Callable, Tuple, Optional, Any
-from .environment import Environment, Cell, EvaluationError
-from .evaluate import wrap, dereference, Eval, Builtin, Boolean, Constant
+from ..environment import Environment, Cell, EvaluationError
+from ..evaluate import wrap, dereference, Eval, Builtin, Boolean, Constant
 
 operators:Dict[
         str,

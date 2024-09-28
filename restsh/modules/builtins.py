@@ -5,11 +5,11 @@ import sys
 import re
 import json
 import base64
-from .environment import Environment, Cell, EvaluationError
-from .evaluate import dereference, wrap, Eval, Builtin, Array, Function, ServiceObject, Object, String, Boolean \
+from ..environment import Environment, Cell, EvaluationError
+from ..evaluate import dereference, wrap, Eval, Builtin, Array, Function, ServiceObject, Object, String, Boolean \
     , Integer, Float, Null, Constant
-from .token import tokens, Op
-from .repl import repLoop
+from ..token import tokens, Op
+from ..repl import repLoop
 
 builtins:Dict[
         str,
