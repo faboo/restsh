@@ -886,7 +886,7 @@ class Call(Eval):
                 environment.error('Parameter `%s` should be %s not %s, %s' % \
                     ( param
                     , describe.article(ptype)
-                    , args[param]
+                    , repr(args[param])
                     , describe.article(
                         describe.typeName(args[param]))
                     ))

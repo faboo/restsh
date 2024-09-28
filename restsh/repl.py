@@ -1,6 +1,7 @@
 from typing import cast, List
 import sys
 import os
+import traceback
 from . import terminal
 from .environment import Environment, EvaluationError, Cell
 from .token import Token
@@ -93,7 +94,10 @@ def repLoop(environment:Environment) -> Eval:
                             terminal.reset(environment.output)
                         environment.lastResult = result
                 except EvaluationError as ex:
-                    pass
+                    if environment.debugErrors:
+                        terminal.setForeground(environment.output, 'red')
+                        traceback.print_exception(ex)
+                        terminal.reset(environment.output)
                 except Exception as ex:
                     terminal.setForeground(environment.output, 'red')
                     environment.print('INTERNAL INTERPRETER ERROR: %s' % str(ex))

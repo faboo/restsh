@@ -7,7 +7,7 @@ from .environment import Environment
 
 def importModule(name:str, environment:Environment) -> None:
     shortname = name+'.py'
-    homename = os.path.expanduser('~/.restsh/'+shortname)
+    homename = environment.homedir+shortname
     moduleName = 'dynrestsh'+name
 
     if os.path.exists(shortname):

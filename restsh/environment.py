@@ -1,4 +1,5 @@
 import sys
+import os.path
 from typing import Dict, Any, Optional, TextIO
 from .service import Service
 from . import terminal
@@ -31,6 +32,7 @@ class Environment:
     def __init__(self, base:Optional['Environment']=None) -> None:
         #print('environment: %s (base? %s)' % (id(self), base is not None))
         self.base = base
+        self.globals = False
         self.loop:bool = True
         self.ngParser:bool = False
         self.debugErrors:bool = False
@@ -52,6 +54,10 @@ class Environment:
         terminal.reset(self.output)
         self.lastError = string
         raise EvaluationError(string)
+
+    @property
+    def homedir(self) -> str:
+        return os.path.expanduser('~/.restsh/')
 
     @property
     def interactive(self) -> bool:
@@ -79,15 +85,12 @@ class Environment:
         return self.variables[name]
 
     def getVariable(self, name:str) -> Cell:
-        if self.base:
-            if name not in self.variables:
-                self.setVariable(name, self.base.getVariable(name))
-            return self.variables[name]
-        else:
-            if name not in self.variables:
+        if name not in self.variables:
+            if self.base:
+                return self.base.getVariable(name)
+            else:
                 self.error('Undefined variable: \'%s\'' % name)
-            return self.variables[name]
-        
+        return self.variables[name]
 
     def getVariableValue(self, name:str) -> Any:
         return self.getVariable(name).value

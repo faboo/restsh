@@ -11,6 +11,7 @@ from . import operators
 from . import http
 from . import time
 from . import file
+from .modules import session
 from . import describe
 from . import parser
 from . import debug
@@ -19,11 +20,14 @@ def setupArguments(args:list) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog='restsh',
         description='REST and RPC processing shell.')
-    parser.add_argument('--environment', '-e', action='append', default=[])
+    parser.add_argument('--environment', '-e', action='append', default=[],
+        help='A script to run before opening the prompt or running the main script')
     parser.add_argument('--skip-rc', '-s', action='store_true', default=False)
     #parser.add_argument('--ng-parser', action='store_true', default=False)
-    parser.add_argument('--debug-internals', action='store_true', default=False)
-    parser.add_argument('--version', action='store_true', default=False)
+    parser.add_argument('--debug-internals', action='store_true', default=False,
+        help='Turn on debugging info for the shell itself')
+    parser.add_argument('--version', action='store_true', default=False,
+        help='Print the restsh version and exit')
     parser.add_argument('script', nargs='?')
     parser.add_argument('scriptargs', nargs='*')
 
@@ -62,25 +66,11 @@ def printVersion() -> None:
     sys.exit(1)
 
 
-def main(args:Optional[list]=None):
-    arguments = setupArguments(args or sys.argv[1:])
-    historyName = os.path.expanduser('~/.restsh_history')
-    rcfile = os.path.expanduser('~/.restshrc')
-
-    if arguments.version:
-        printVersion()
-
-    # ensure the history file exists
-    with open(historyName, mode='a', encoding='utf-8') as history:
-        print('', file=history)
-
+def createBaseEnv(arguments:argparse.Namespace) -> Environment:
     environment = Environment()
 
-    #environment.ngParser = arguments.ng_parser
-    environment.debugErrors = arguments.debug_internals
-    debug.showDebug = arguments.debug_internals
-
     environment.setVariable('args', wrap(arguments.scriptargs))
+    environment.setVariable('env', wrap(dict(**os.environ)))
     environment.setVariable('__result', Null())
     environment.setVariable('null', Null())
     environment.setVariable('true', Boolean(True))
@@ -94,6 +84,30 @@ def main(args:Optional[list]=None):
     http.register(environment)
     time.register(environment)
     file.register(environment)
+    session.register(environment)
+
+    return environment
+
+
+def main(args:Optional[list]=None):
+    arguments = setupArguments(args or sys.argv[1:])
+    historyName = os.path.expanduser('~/.restsh_history')
+    rcfile = os.path.expanduser('~/.restshrc')
+
+    if arguments.version:
+        printVersion()
+
+    # ensure the history file exists
+    with open(historyName, mode='a', encoding='utf-8') as history:
+        history.write('')
+
+    # Base the global environment of a base environment.
+    environment = Environment(createBaseEnv(arguments))
+    environment.globals = True
+    #environment.ngParser = arguments.ng_parser
+    environment.debugErrors = arguments.debug_internals
+    debug.showDebug = arguments.debug_internals
+
 
     if not arguments.skip_rc and os.path.exists(rcfile):
         with open(rcfile, 'r', encoding='utf-8') as rsource:

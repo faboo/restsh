@@ -36,7 +36,8 @@ def printWrapped(env:Environment, text:str) -> None:
 def environment(env:Environment) -> None:
     sym = re.compile('[_a-zA-Z][_a-zA-Z0-9]*$')
     op = re.compile('[-+*/|&^$@?~]+$')
-    syms = [var for var in env.variables if sym.match(var)]
+    allVars = {**env.base.variables, **env.variables}
+    syms = [var for var in allVars if sym.match(var)]
     var = [var for var in syms if not env.getVariableValue(var).isType('function')]
     func = [var for var in syms if env.getVariableValue(var).isType('function')]
     printWrapped(env, GeneralHelp)
@@ -53,7 +54,7 @@ def environment(env:Environment) -> None:
     env.print('\nOperators:')
     printWrapped(
         env,
-        ', '.join(var for var in env.variables if op.match(var))
+        ', '.join(var for var in allVars if op.match(var))
         )
 
 

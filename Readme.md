@@ -406,19 +406,53 @@ If other files are provided on the command-line, they will be run in order and t
 
 While in general you probably want to use something like Python for standalone scripts, you can create Restsh scripts similarly to shell scripts:
 
-```
-$ cat > runme <<END
-#!/usr/local/bin/restsh
+	$ cat > runme <<END
+	#!/usr/local/bin/restsh
 
-print(text: "You ran me!")
-END
-$ chmod u+x runme
-$ ./runme
-You ran me!
-$
-```
+	print(text: "You ran me!")
+	END
+	$ chmod u+x runme
+	$ ./runme
+	You ran me!
+	$
 
 Arguments passed to the script on the command line are stored as an array of strings in the `args` top-level variable.
+
+# Sessions
+
+You can save and load the current state of the shell with the `session` module.
+
+To save the current session, use `session.save`, like so:
+
+	$ import weatherapi
+	$ let data = weatherapi.today()
+	$ let tempF = data.temp * 1.8 + 32
+	$ session.save(name: "weather")
+
+Our two variables, `data` and `tempF`, and the fact that we imported weatherapi are saved in a session named "weather" (and "weather" becomes the default session).
+
+We can reload this session with `session.open`:
+
+	$ session.open(name: "weather")
+	$ print(text: "Temperature: " | string(value: tempF) | "F")
+	Temperature: 45F
+
+When a session is saved or opened it becomes the `current` session, and future calls to `save` will save to that session by default.
+
+	$ session.open(name: "weather")
+	$ let precip = data.precipitation
+	$ session.save()
+
+By default, the current session name is the empty string.
+
+Additionally, you can clear the current session using `session.clear`:
+
+	$ session.open(name: "weather")
+	$ print(text: precip)
+	Light Rain
+	$ session.clear()
+	$ print(text: string(value: tempF))
+	error: Undefined variable: 'tempF'
 
 
 # Copyright
