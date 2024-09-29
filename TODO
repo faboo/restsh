@@ -1,3 +1,1 @@
-Move built-in modules to modules/ and load them like custom modules
-
 Separate interpreter data-value types from expressed syntax and values

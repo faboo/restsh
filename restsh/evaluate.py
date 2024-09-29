@@ -1,4 +1,5 @@
 from typing import cast, Union, Dict, Any, List, Callable, Optional
+import re
 from .environment import Environment, Cell, EvaluationError
 from .token import Sym, Eq, LParen, RParen, LAngle, RAngle, LBrace, RBrace, LBracket, RBracket \
     , Comma, Colon, SemiColon, Bang, Dot, BSlash \
@@ -7,6 +8,7 @@ from .service import Service, UnsupportedProtocol
 from . import describe
 from . import terminal
 from .module import importModule
+from .debug import debug
 
 
 class Eval:
@@ -420,7 +422,7 @@ class ServiceObject(Object):
 
     def setHost(self, environment:Environment, args:Dict[str, Union[Eval, Cell]]) -> Union[Eval, Cell]:
         host = cast(String, args['host'])
-        print('Setting host', host)
+        debug('Setting host', host)
         environment.services[self.name].setHost(host.getValue())
         return self
 
@@ -595,14 +597,17 @@ class String(Constant):
         return self.value
 
     def toJson(self) -> str:
-        print('STRING TO JSON ', self.value[0:120])
+        debug('STRING TO JSON ', self.value[0:120])
         value = self.value.replace('\n', '\\n').replace('\t', '\\t')
-        print('          JSON ', value[0:120])
+        debug('          JSON ', value[0:120])
         return '"'+value+'"'
 
     @staticmethod
     def parse(string:Str) -> Eval:
-        return String(string.text[1:-1])
+        debug('PARSING STRING: %s' % string)
+        unescaped = string.text[1:-1].replace('\\n', '\n').replace('\\t', '\t')
+        unescaped = re.sub(r'\\(.)', r'\1', unescaped)
+        return String(unescaped)
 
     def getValue(self) -> Any:
         return self.value

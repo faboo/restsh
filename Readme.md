@@ -208,6 +208,18 @@ Notice that the order of the arguments doesn't matter - just that they're named 
 
 If you need to do more than one thing in a function, you can chain together expressions with `;`. The final expression will be the result of the function.
 
+	$ let accum = 0
+	$ let bump = \.
+	.  set(var: accum, value: accum + 1);
+	.  print(text: "Accum: " | string(value: accum));
+	.  accum < 4
+	$ do(fn: bump)
+	Accum: 1
+	Accum: 2
+	Accum: 3
+	Accum: 4
+	null
+
 ## Handling errors
 
 Most errors cancel execution of a command. However, if it's desirable to ignore an error, a `try` expression can be used to instead return `null` in case of an error.
