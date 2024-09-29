@@ -1,6 +1,7 @@
 from typing import cast, Union, Dict, Callable, Tuple, List, Optional, Any
 from urllib import request
 from urllib.error import HTTPError
+from ..moduleUtils import builtin
 from ..environment import Environment, Cell
 from ..evaluate import dereference, wrap, DictObject, Builtin, String, Eval
 
@@ -40,17 +41,20 @@ def bRequest(environment:Environment, method:str, url:str, data:Optional[str]) -
 
     
 
+@builtin('get', {'url': 'string'})
 def bGet(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     url = cast(String, dereference(args['url'])).getValue()
     return bRequest(environment, 'GET', url, None)
 
 
+@builtin('post', {'url': 'string', 'data': 'string'})
 def bPost(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     url = cast(String, dereference(args['url'])).getValue()
     data = cast(String, dereference(args['data'])).getValue()
     return bRequest(environment, 'POST', url, data)
 
 
+@builtin('head', {'url': 'string'})
 def bHead(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     # TODO
     url = cast(String, dereference(args['url'])).getValue()
@@ -81,11 +85,13 @@ def bHead(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Ev
     return wrap(text)
 
 
+@builtin('delete', {'url': 'string'})
 def bDelete(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     url = cast(String, dereference(args['url'])).getValue()
     return bRequest(environment, 'DELETE', url, None)
 
 
+@builtin('options', {'url': 'string'})
 def bOptions(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     url = cast(String, dereference(args['url'])).getValue()
     return bRequest(environment, 'OPTIONS', url, None)
@@ -93,11 +99,11 @@ def bOptions(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union
 
 def register(environment:Environment):
     httpObj = DictObject(
-        { 'get': Builtin('get', bGet, {'url': 'string'})
-        , 'post': Builtin('post', bPost, {'url': 'string', 'data': 'string'})
-        , 'head': Builtin('head', bHead, {'url': 'string'})
-        , 'delete': Builtin('delete', bHead, {'url': 'string'})
-        , 'options': Builtin('options', bHead, {'url': 'string'})
+        { 'get': bGet
+        , 'post': bPost
+        , 'head': bHead
+        , 'delete': bDelete
+        , 'options': bOptions
         })
     httpObj.description = "Functions for making simple HTTP requests."
     environment.setVariable('http', httpObj)

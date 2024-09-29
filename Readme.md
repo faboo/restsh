@@ -68,9 +68,9 @@ Restsh supports four simple types:
 	
 		`"Hello World!"`
 	
-	* Double quotes inside a string can be escaped with a `\`
+	* Double quotes, newlines, and tabs inside a string can be escaped with a `\`
 	
-		`"\"Learn programming,\" they said. \"It'll be fun,\" they said."`
+		`"\"Learn programming,\" they said.\n\"It'll be fun,\" they said."`
 
 * integers
 
