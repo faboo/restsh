@@ -1,13 +1,10 @@
 from typing import cast, List
-import sys
-import os
 import traceback
 from . import terminal
 from .environment import Environment, EvaluationError, Cell
 from .token import Token
 from .reader import read, EndOfFile, UntokenizableError
-from .parser import parse, ParseError, PartialParseError, EndOfTokens, statement
-from . import tableParser
+from .parser import parse, ParseError, PartialParseError, EndOfTokens
 from .evaluate import Eval
 from .debug import debug
 
@@ -21,11 +18,6 @@ def printable(value:Eval) -> bool:
 def repLoop(environment:Environment) -> Eval:
     parser = parse
     tokens:List[Token] = []
-
-    if environment.ngParser:
-        tparser = tableParser.Parser(statement)
-        tparser.printTransitionTable()
-        parser = tparser.parse
 
     while environment.loop:
         previousTokens = tokens

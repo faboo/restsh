@@ -1,10 +1,10 @@
 import sys
 from . import terminal
 
-showDebug = False
+ShowDebug = False
 
 def debug(*strings:str) -> None:
-    if showDebug:
+    if ShowDebug:
         terminal.setBackground(sys.stdout, 'purple')
         print('   ', end='')
         terminal.reset(sys.stdout)

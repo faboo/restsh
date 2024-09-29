@@ -23,7 +23,7 @@ def flatten(value:Eval) -> str:
         return repr(value)
 
 def legalSymbol(sym:str) -> bool:
-    return re.match('[_a-zA-Z][_a-zA-Z0-9]*$', sym)
+    return bool(re.match('[_a-zA-Z][_a-zA-Z0-9]*$', sym))
 
 @builtin('save', {'name': '?string'}, 'Save the current session. Saves to the current session if no name is provided.')
 def bSave(environment, args):

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import cast, Any
 import os
 import re
 from .environment import Environment, Cell
@@ -36,7 +36,7 @@ def printWrapped(env:Environment, text:str) -> None:
 def environment(env:Environment) -> None:
     sym = re.compile('[_a-zA-Z][_a-zA-Z0-9]*$')
     op = re.compile('[-+*/|&^$@?~]+$')
-    allVars = {**env.base.variables, **env.variables}
+    allVars = {**cast(Environment, env.base).variables, **env.variables}
     syms = [var for var in allVars if sym.match(var)]
     var = [var for var in syms if not env.getVariableValue(var).isType('function')]
     func = [var for var in syms if env.getVariableValue(var).isType('function')]
@@ -80,7 +80,7 @@ def typeName(variable:Any) -> str:
 
 
 def function(env:Environment, func:Any) -> None:
-    params:Dict[str,str] = func.parameters(env)
+    params:dict[str,str] = func.parameters(env)
 
     if params:
         description = 'It takes %s arguments:\n' % len(params)

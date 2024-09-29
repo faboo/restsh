@@ -58,10 +58,10 @@ class Service:
         strings = template.split('$$')
 
 
-        for index in range(len(strings)):
+        for index, string in enumerate(strings):
             for param in parameters.keys():
                 arg = arguments.get(param, '')
-                strings[index] = re.sub(r'\$' + param + r'\$', str(arg), strings[index])
+                strings[index] = re.sub(r'\$' + param + r'\$', str(arg), string)
 
         #print('filled template: ', string)
         return '$'.join(strings)
@@ -137,6 +137,7 @@ class HttpService(Service):
 
 
     def call(self, name:str, arguments:dict) -> Any:
+        #pylint: disable=too-many-locals
         call = self.callDef[name]
         timeout = call['timeout']
         params = self.describe(name)
@@ -226,6 +227,7 @@ class AmqpService(Service):
 
 
     def call(self, name:str, arguments:dict) -> Any:
+        #pylint: disable=too-many-locals
         # TODO: add request and response headers
         import amqp #pylint: disable=import-outside-toplevel
         startTime = time.monotonic()

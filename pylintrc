@@ -358,6 +358,7 @@ good-names=ex,
            id,
            _,
            __,
+           ___,
            x,
            y,
            at,
@@ -365,6 +366,7 @@ good-names=ex,
            xp,
            eq,
            op,
+           __main__,
 
 # Include a hint for the correct naming format with invalid-name.
 include-naming-hint=no
@@ -504,5 +506,5 @@ min-public-methods=1
 
 # Exceptions that will emit a warning when being caught. Defaults to
 # "Exception".
-overgeneral-exceptions=BaseException
+overgeneral-exceptions=builtins.BaseException
 

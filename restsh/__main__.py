@@ -13,7 +13,6 @@ from .modules import time
 from .modules import file
 from .modules import session
 from . import describe
-from . import parser
 from . import debug
 
 def setupArguments(args:list) -> argparse.Namespace:
@@ -70,7 +69,7 @@ def createBaseEnv(arguments:argparse.Namespace) -> Environment:
     environment = Environment()
 
     environment.setVariable('args', wrap(arguments.scriptargs))
-    environment.setVariable('env', wrap(dict(**os.environ)))
+    environment.setVariable('env', wrap({**os.environ}))
     environment.setVariable('__result', Null())
     environment.setVariable('null', Null())
     environment.setVariable('true', Boolean(True))
@@ -106,7 +105,7 @@ def main(args:Optional[list]=None):
     environment.globals = True
     #environment.ngParser = arguments.ng_parser
     environment.debugErrors = arguments.debug_internals
-    debug.showDebug = arguments.debug_internals
+    debug.ShowDebug = arguments.debug_internals
 
 
     if not arguments.skip_rc and os.path.exists(rcfile):

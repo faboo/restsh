@@ -1,7 +1,7 @@
 from typing import cast, Union, Dict, Any, List, Callable, Optional
 import re
 from .environment import Environment, Cell, EvaluationError
-from .token import Sym, Eq, LParen, RParen, LAngle, RAngle, LBrace, RBrace, LBracket, RBracket \
+from .token import Sym, Eq, LParen, RParen, LBrace, LBracket, RBracket \
     , Comma, Colon, SemiColon, Bang, Dot, BSlash \
     , Str, Flt, Int, If, Then, Else, Let, Imp, Help, Ext, Try
 from .service import Service, UnsupportedProtocol
@@ -198,9 +198,6 @@ class ParamList(Eval):
 
 
 class Function(Object):
-    def __init__(self) -> None:
-        self.description:Optional[str] = None
-
     def get(self, name:str, environment:Environment) -> Union[Eval, Cell]:
         result:Eval = self
         if name == 'parameters':
@@ -402,6 +399,7 @@ class ArgList(Eval):
 
 class ServiceObject(Object):
     def __init__(self, name:str) -> None:
+        super().__init__()
         self.name:str = name
         self.calls:Dict[str,ServiceCall] = {}
         self.methods:Dict[str,Builtin] = \
@@ -422,7 +420,7 @@ class ServiceObject(Object):
 
     def setHost(self, environment:Environment, args:Dict[str, Union[Eval, Cell]]) -> Union[Eval, Cell]:
         host = cast(String, args['host'])
-        debug('Setting host', host)
+        debug('Setting host', str(host))
         environment.services[self.name].setHost(host.getValue())
         return self
 
@@ -454,6 +452,7 @@ class ServiceObject(Object):
 
 class DictObject(Object):
     def __init__(self, props:Dict[str, Eval]) -> None:
+        super().__init__()
         self.evaluated = False
         self._properties:Dict[str, Cell] = \
             { prop: Cell(value)
@@ -469,7 +468,9 @@ class DictObject(Object):
 
 
     def toJson(self) -> str:
-        return '{ %s}' % ', '.join('"%s": %s\n' % (prop, dereference(value).toJson()) for prop, value in self._properties.items())
+        return '{ %s}' % ', '.join(
+            '"%s": %s\n' % (prop, dereference(value).toJson())
+            for prop, value in self._properties.items())
 
 
     @staticmethod
