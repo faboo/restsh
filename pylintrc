@@ -86,6 +86,7 @@ disable=raw-checker-failed,
 		consider-using-f-string,
 		multiple-statements,
 		too-many-return-statements,
+        no-else-raise,
 		arguments-differ,
 
 

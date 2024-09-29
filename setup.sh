@@ -9,6 +9,6 @@ source .venv/bin/activate
 
 for requirements in requirements/*
 do
-	pip3 install -q -r $requirements
+	pip3 install --no-user -q -r $requirements
 done
 

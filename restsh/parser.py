@@ -12,7 +12,12 @@ class EndOfTokens(Exception):
         self.inside = inside
 
 class ParseError(Exception):
-    def __init__(self, inside:Optional['Production'], tokens:List[Union[Type[Token], Type[Eval]]], endOfTokens:bool) -> None:
+    def __init__(self,
+            inside:Optional['Production'],
+            tokens:List[Union[Type[Token],
+            Type[Eval]]],
+            endOfTokens:bool
+            ) -> None:
         super().__init__()
         self.inside = inside
         self.tokens = tokens
@@ -107,7 +112,7 @@ class Production:
                 if match[2]:
                     eot = True
 
-                if not longestMatch:
+                if longestMatch is None:
                     #print(' '*offset, f'setting longest match: {match}')
                     longestMatch = match
                 # the longest match is the one that leaves the least tokens
@@ -127,7 +132,7 @@ class Production:
         # If there is either no matching rule, or the matching rule leaves items on the stack
         if not longestMatch:
             # We had a partial match
-            if partial:
+            if partial is not None:
                 raise partial
 
             # Otherwise, collect our expected tokens for a parse error
@@ -140,9 +145,9 @@ class Production:
             raise ParseError(self, tokens, eot)
 
         # Our longest match leaves tokens/Evel left to parse
-        elif longestMatch[1] and partial:
+        elif longestMatch[1] and partial is not None:
             #print(" -> END OF TOKENS %s, %s" % (self.name, longestMatch))
-            raise partial
+            raise partial #pylint: disable=raising-bad-type
 
         #print(' '*offset, '-> lM %s' % (longestMatch,))
 
@@ -169,12 +174,12 @@ class Production:
                 #print('%s read interim result %s (%s); reparsing: %s' % (self, result, result.__class__, stack))
         except EndOfTokens as ex:
             #print('End of tokens')
-            if not fullResult:
+            if fullResult is None:
                 #print(f'Unwinding end of tokens:  {ex.inside.name}, stack: {fullResult and fullResult[1]}')
                 raise
             elif fullResult[1]:
-                raise ParseError(self, [], True)
-        except ParseError as ex:
+                raise ParseError(self, [], True) from ex
+        except ParseError:
             #print(f'ex: {ex.__class__}, {ex.inside.name}, {ex.endOfTokens}')
             if not fullResult:
                 raise

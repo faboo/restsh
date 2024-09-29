@@ -8,4 +8,4 @@ python -m compileall -l .
 mypy -p $PROJECT
 pylint $PROJECT/*.py #$PROJECT/*/*.py
 #pytest --disable-warnings tests/
-python setup.py check
+python setup.py check && echo " ...passed."
