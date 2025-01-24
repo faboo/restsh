@@ -204,6 +204,11 @@ this:
 	$ sum(bar: 3, foo: 5)
 	2
 
+or, with positional arguments:
+
+	$ sum(5, 3)
+	2
+
 Notice that the order of the arguments doesn't matter - just that they're named correctly. Built-in functions and service methods may also have specific type requirements for their arguments.
 
 If you need to do more than one thing in a function, you can chain together expressions with `;`. The final expression will be the result of the function.

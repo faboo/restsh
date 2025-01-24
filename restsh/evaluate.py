@@ -852,10 +852,13 @@ class Call(Eval):
         kvargs:dict[str, Eval] = { }
 
         debug('Call args is: %s' % type(args[1]))
-        if isinstance(args[1], ArgList):
-            kvargs = args[1].args
-        elif isinstance(args[1], ElementList):
+        if isinstance(args[1], ElementList):
             vargs = args[1].elements
+        elif isinstance(args[1], ArgList):
+            kvargs = args[1].args
+
+        if len(args) > 3:
+            kvargs = args[3].args
 
         return Call(func, vargs, kvargs)
 
