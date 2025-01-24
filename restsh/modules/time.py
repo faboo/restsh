@@ -2,8 +2,9 @@ from typing import cast, Union, Dict, Callable, Tuple, List, Optional, Any
 from datetime import datetime, timezone
 import dateutil.parser as dateparser
 import dateutil.tz
+from ..moduleUtils import builtin
 from ..environment import Environment, Cell
-from ..evaluate import dereference, wrap, DictObject, Builtin, String, Constant, Eval
+from ..evaluate import dereference, wrap, DictObject, String, Constant, Eval
 
 class Time(Constant):
     def __init__(self, time:datetime) -> None:
@@ -26,10 +27,12 @@ class Time(Constant):
         return super().isType(typeDesc) or typeDesc == 'time'
 
 
+@builtin('now', [], 'Returns a new Time object with the current time and date.')
 def bNow(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     return Time(datetime.now(timezone.utc))
 
 
+@builtin('show', [('time', 'time'), ('tz', 'string')], 'Convert a Time to a string in ISO format.')
 def bShow(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     time = cast(Time, dereference(args['time'])).getValue()
     tzstr = cast(String, dereference(args['tz'])).getValue()
@@ -39,6 +42,7 @@ def bShow(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Ev
     return wrap(time.isoformat())
 
 
+@builtin('showhttp', [('time', 'time'), ('tz', 'string')], 'Convert a Time to a string in HTTP format.')
 def bShowhttp(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     time = cast(Time, dereference(args['time'])).getValue()
     tzstr = cast(String, dereference(args['tz'])).getValue()
@@ -50,6 +54,7 @@ def bShowhttp(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Unio
     return wrap(time.strftime('%a, %d %b %Y %H:%M:%S %Z'))
 
 
+@builtin('parse', [('str', 'string')], 'Generically parse a date/time string.')
 def bParse(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     string = cast(String, dereference(args['str'])).getValue()
 
@@ -62,12 +67,17 @@ def bParse(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[E
     return Time(time)
 
 
+@builtin('timestamp', [('time', 'time')], 'Convert a Time to a Unix timestamp.')
 def bTimestamp(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     time = cast(Time, dereference(args['time'])).getValue()
 
     return wrap(time.timestamp())
 
 
+@builtin(
+    'lt',
+    [('left', 'time'), ('right', 'time')],
+    'Returns true if the \'left\' argument is before (less than) the \'right\'.')
 def bLt(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     left = cast(Time, dereference(args['left'])).getValue()
     right = cast(Time, dereference(args['right'])).getValue()
@@ -75,6 +85,10 @@ def bLt(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval
     return wrap(left < right)
 
 
+@builtin(
+    'gt',
+    [('left', 'time'), ('right', 'time')],
+    'Returns true if the \'left\' argument is after (greater than) the \'right\'.')
 def bGt(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     left = cast(Time, dereference(args['left'])).getValue()
     right = cast(Time, dereference(args['right'])).getValue()
@@ -84,28 +98,13 @@ def bGt(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval
 
 def register(environment:Environment):
     timeObj = DictObject(
-        { 'now': Builtin('now', bNow, {}, 'Returns a new Time object with the current time and date.')
-        , 'parse': Builtin('parse', bParse, {'str': 'string'}, 'Generically parse a date/time string.')
-        , 'show': Builtin('show',
-            bShow,
-            {'time': 'time', 'tz': 'string'},
-            'Convert a Time to a string in ISO format.')
-        , 'showhttp': Builtin('showhttp',
-            bShowhttp,
-            {'time': 'time', 'tz': 'string'},
-            'Convert a Time to a string in HTTP request format.')
-        , 'timestamp': Builtin('timestamp',
-            bTimestamp,
-            {'time': 'time'},
-            'Convert a Time to a Unix timestamp.')
-        , 'lt': Builtin('lt',
-            bLt,
-            {'left': 'time', 'right': 'time'},
-            'Returns true if the \'left\' argument is before (less than) the \'right\'.')
-        , 'gt': Builtin('gt',
-            bGt,
-            {'left': 'time', 'right': 'time'},
-            'Returns true if the \'left\' argument is after (greather than) the \'right\'.')
+        { 'now': bNow
+        , 'show': bShow
+        , 'showhttp': bShowhttp
+        , 'parse': bParse
+        , 'timestamp': bTimestamp
+        , 'lt': bLt
+        , 'gt': bGt
         })
     timeObj.description = 'Functions to create and manipulate Time.'
     environment.setVariable('time', timeObj)

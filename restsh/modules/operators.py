@@ -98,5 +98,6 @@ def register(environment:Environment):
     for name, (operator, (left, right)) in operators.items():
         environment.setVariable(
             name,
-            Builtin(name, operator, {'left': left, 'right': right}))
+            Builtin(name, operator, [('left', left), ('right', right)]))
+
 

@@ -41,20 +41,20 @@ def bRequest(environment:Environment, method:str, url:str, data:Optional[str]) -
 
     
 
-@builtin('get', {'url': 'string'})
+@builtin('get', [('url', 'string')])
 def bGet(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     url = cast(String, dereference(args['url'])).getValue()
     return bRequest(environment, 'GET', url, None)
 
 
-@builtin('post', {'url': 'string', 'data': 'string'})
+@builtin('post', [('url', 'string'), ('data', 'string')])
 def bPost(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     url = cast(String, dereference(args['url'])).getValue()
     data = cast(String, dereference(args['data'])).getValue()
     return bRequest(environment, 'POST', url, data)
 
 
-@builtin('head', {'url': 'string'})
+@builtin('head', [('url', 'string')])
 def bHead(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     # TODO
     url = cast(String, dereference(args['url'])).getValue()
@@ -85,13 +85,13 @@ def bHead(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Ev
     return wrap(text)
 
 
-@builtin('delete', {'url': 'string'})
+@builtin('delete', [('url', 'string')])
 def bDelete(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     url = cast(String, dereference(args['url'])).getValue()
     return bRequest(environment, 'DELETE', url, None)
 
 
-@builtin('options', {'url': 'string'})
+@builtin('options', [('url', 'string')])
 def bOptions(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
     url = cast(String, dereference(args['url'])).getValue()
     return bRequest(environment, 'OPTIONS', url, None)

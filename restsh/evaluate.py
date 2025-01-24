@@ -1,5 +1,7 @@
+#pylint: disable=too-many-lines
 from typing import cast, Union, Dict, Any, List, Callable, Optional
 import re
+from collections import OrderedDict
 from .environment import Environment, Cell, EvaluationError
 from .token import Sym, Eq, LParen, RParen, LBrace, LBracket, RBracket \
     , Comma, Colon, SemiColon, Bang, Dot, BSlash \
@@ -211,8 +213,8 @@ class Function(Object):
     def properties(self) -> List[str]:
         return ['parameters']
 
-    def parameters(self, environment:Environment) -> Dict[str, str]:
-        return {}
+    def parameters(self, environment:Environment) -> OrderedDict[str, str]:
+        return OrderedDict()
 
     def call(self, environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
         return self
@@ -225,18 +227,18 @@ class Builtin(Function):
     def __init__(self,
             name:str,
             func:Callable[[Environment, Dict[str, Union[Eval, Cell]]], Union[Eval, Cell]],
-            params:Dict[str,str],
+            params:list[tuple[str,str]],
             description:Optional[str]=None) -> None:
         super().__init__()
         self.name = name
         self.func = func
-        self.params = params
+        self.params = OrderedDict(params)
         self.description = description
 
     def __repr__(self) -> str:
         return 'builtin[%s]' % self.name
 
-    def parameters(self, environment:Environment) -> Dict[str, str]:
+    def parameters(self, environment:Environment) -> OrderedDict[str, str]:
         return self.params
 
     def call(self, environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
@@ -244,10 +246,10 @@ class Builtin(Function):
 
 
 class Closure(Function):
-    def __init__(self, params:List[str], expr:Eval) -> None:
+    def __init__(self, params:list[str], expr:Eval) -> None:
         super().__init__()
-        self.params:List[str] = params
-        self.expression:Eval = expr
+        self.params = params
+        self.expression = expr
         self.environment:Optional[Environment] = None
         self.evaluated = False
 
@@ -274,8 +276,8 @@ class Closure(Function):
             self.evaluated = True
         return self
 
-    def parameters(self, environment:Environment) -> Dict[str, str]:
-        return { param: 'any' for param in self.params }
+    def parameters(self, environment:Environment) -> OrderedDict[str, str]:
+        return OrderedDict([ (param, 'any') for param in self.params ])
 
     def call(self, _:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eval, Cell]:
         if self.environment is None:
@@ -297,7 +299,7 @@ class ServiceCall(Function):
     def __repr__(self) -> str:
         return 'ServiceCall[%s.%s]' % (self.service, self.name)
 
-    def parameters(self, environment:Environment) -> Dict[str, str]:
+    def parameters(self, environment:Environment) -> OrderedDict[str, str]:
         service = environment.services[self.service]
         return service.describe(self.name)
 
@@ -403,12 +405,12 @@ class ServiceObject(Object):
         self.name:str = name
         self.calls:Dict[str,ServiceCall] = {}
         self.methods:Dict[str,Builtin] = \
-            { 'setHost': Builtin('setHost', self.setHost, {'host': 'string'})
+            { 'setHost': Builtin('setHost', self.setHost, [('host', 'string')])
             , 'setAuthentication':
                 Builtin(
                     'setAuthentication',
                     self.setAuthentication,
-                    {'auth': 'string'},
+                    [('auth', 'string')],
                     'Replace the authentication data for this service.')
             }
 
@@ -831,33 +833,42 @@ class TryException(Eval):
 
 
 class Call(Eval):
-    def __init__(self, func:Eval, args:Dict[str,Eval]) -> None:
+    def __init__(self, func:Eval, vargs:list[Eval], kvargs:dict[str,Eval]) -> None:
         self.func:Eval = func
-        self.args:Dict[str,Eval] = args
-        
-    
+        self.vargs = vargs
+        self.kvargs = kvargs
+
     def __repr__(self) -> str:
+        vargs = ', '.join(repr(value) for value in self.vargs)
+        kvargs = ', '.join('%s: %s' % (key, repr(value)) for key, value in self.kvargs.items())
+
         return '%s(%s)' % (
-            repr(self.func),
-            ', '.join('%s: %s' % (key, repr(self.args[key])) for key in self.args.keys())
+            repr(self.func), ', '.join([vargs, kvargs])
             )
 
     @staticmethod
     def parse(func:Eval, *args) -> Eval:
-        argList:Dict[str, Eval]
+        vargs:list[Eval] = []
+        kvargs:dict[str, Eval] = { }
 
+        debug('Call args is: %s' % type(args[1]))
         if isinstance(args[1], ArgList):
-            argList = args[1].args
-        else:
-            argList = { }
+            kvargs = args[1].args
+        elif isinstance(args[1], ElementList):
+            vargs = args[1].elements
 
-        return Call(func, argList)
+        return Call(func, vargs, kvargs)
 
     def evaluate(self, environment:Environment) -> Union[Eval, Cell]:
-        args = \
+        vargs = \
+            [ arg.evaluate(environment)
+              for arg in self.vargs
+            ]
+        kvargs = \
             { key: arg.evaluate(environment)
-              for key, arg in self.args.items()
+              for key, arg in self.kvargs.items()
             }
+        args:dict[str,Eval|Cell] = { }
         func = dereference(self.func.evaluate(environment))
 
         if not isinstance(func, Function):
@@ -865,37 +876,44 @@ class Call(Eval):
 
         params = cast(Function, func).parameters(environment)
 
-        for param in params:
-            ptype = params[param]
+        for param, ptype in params.items():
             optional = ptype[0] == '?'
 
             if optional:
                 ptype = ptype[1:]
 
-            if param not in args:
+            if not vargs and param not in kvargs:
                 if not optional:
                     environment.error('Missing argument: `%s` should be %s' % \
                         ( param
                         , describe.article(params[param])
                         ))
 
+            if vargs:
+                arg = vargs[0]
+                vargs = vargs[1:]
+            else:
+                arg = kvargs[param]
+
             if params[param] == 'cell':
-                if not isinstance(args[param], Cell):
+                if not isinstance(arg, Cell):
                     environment.error('Parameter `%s` should be a variable or other cell not %s, %s' % \
                         ( param
-                        , args[param]
+                        , arg
                         , describe.article(
-                            describe.typeName(args[param]))
+                            describe.typeName(arg))
                         ))
-                    
-            elif param in args and not dereference(args[param]).isType(ptype):
+
+            elif not dereference(arg).isType(ptype):
                 environment.error('Parameter `%s` should be %s not %s, %s' % \
                     ( param
                     , describe.article(ptype)
-                    , repr(args[param])
+                    , repr(arg)
                     , describe.article(
-                        describe.typeName(args[param]))
+                        describe.typeName(arg))
                     ))
+
+            args[param] = arg
 
         try:
             terminal.setForeground(environment.output, 'yellow')
@@ -908,9 +926,8 @@ class OpCall(Call):
     def __init__(self, op:Eval, left:Eval, right:Eval) -> None:
         super().__init__(
             op, 
-            { 'left': left
-            , 'right': right
-            })
+            [ left, right ],
+            { })
 
         self.op = op
         self.left = left

@@ -25,7 +25,7 @@ def flatten(value:Eval) -> str:
 def legalSymbol(sym:str) -> bool:
     return bool(re.match('[_a-zA-Z][_a-zA-Z0-9]*$', sym))
 
-@builtin('save', {'name': '?string'}, 'Save the current session. Saves to the current session if no name is provided.')
+@builtin('save', [('name', '?string')], 'Save the current session. Saves to the current session if no name is provided.')
 def bSave(environment, args):
     if 'name' in args:
         name = args['name'].toPython()
@@ -58,7 +58,7 @@ def bSave(environment, args):
     return None
 
 
-@builtin('open', {'name': 'string'}, 'Load a saved session. Loads the current session if no name is provided.')
+@builtin('open', [('name', 'string')], 'Load a saved session. Loads the current session if no name is provided.')
 def bOpen(environment, args):
     name = args['name'].toPython()
     filename = environment.homedir+name+'.sess'
@@ -79,7 +79,7 @@ def bOpen(environment, args):
     return None
 
 
-@builtin('clear', {}, 'Clear the current session of new definitions and services.')
+@builtin('clear', [], 'Clear the current session of new definitions and services.')
 def bClear(environment, args):
     environment.variables = { }
     environment.services = { }

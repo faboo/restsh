@@ -2,7 +2,7 @@ from ..moduleUtils import builtin
 from ..evaluate import DictObject, wrap
 from ..environment import EvaluationError
 
-@builtin('read', {'file': 'string'}, 'Read a text file into a string')
+@builtin('read', [('file', 'string')], 'Read a text file into a string')
 def bRead(environment, args):
     filename = args['file'].toPython()
 
@@ -15,7 +15,7 @@ def bRead(environment, args):
     return wrap(contents)
 
 
-@builtin('write', {'file': 'string', 'text': 'string'}, 'Write a string to a file')
+@builtin('write', [('file', 'string'), ('text', 'string')], 'Write a string to a file')
 def bWrite(environment, args):
     filename = args['file'].toPython()
     text = args['text'].toPython()
@@ -26,7 +26,7 @@ def bWrite(environment, args):
     return None
 
 
-@builtin('append', {'file': 'string', 'text': 'string'}, 'Write a string to a file')
+@builtin('append', [('file', 'string'), ('text', 'string')], 'Write a string to a file')
 def bAppend(environment, args):
     filename = args['file'].toPython()
     text = args['text'].toPython()

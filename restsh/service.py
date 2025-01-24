@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional, List
+from typing import Any, Optional, List
 import os
 import uuid
 import ssl
@@ -9,6 +9,7 @@ import yaml
 import json
 import base64
 import re
+from collections import OrderedDict
 
 class UnsupportedProtocol(Exception):
     def __init__(self, protocol:str) -> None:
@@ -41,7 +42,7 @@ class Service:
         self.description:Optional[str] = definition.get('description', None)
         self.authType:Optional[str] = None
         self.authData:Optional[str] = None
-        self.callDef:Dict[str, dict] = { }
+        self.callDef:OrderedDict[str, dict] = OrderedDict()
 
         if 'authentication' in definition:
             self.authType = definition['authentication'].get('type')
@@ -54,7 +55,7 @@ class Service:
         self.authData = auth
 
 
-    def fillTemplate(self, template:str, parameters:dict, arguments:dict) -> str:
+    def fillTemplate(self, template:str, parameters:dict[str,str], arguments:dict) -> str:
         strings = template.split('$$')
 
 
@@ -75,7 +76,7 @@ class Service:
                 self.fillCall(callDef[key], templ[key])
 
 
-    def createCall(self, definition:dict) -> None:
+    def createCall(self, definition:OrderedDict) -> None:
         self.fillCall(
             definition,
             { 'timeout': 60
@@ -88,6 +89,8 @@ class Service:
                 , 'error': None
                 }
             })
+        
+        definition['params'] = OrderedDict(definition.get('params', []))
 
         self.callDef[definition['name']] = definition
 
@@ -101,8 +104,8 @@ class Service:
     def getCallNames(self) -> List[str]:
         return list(self.callDef.keys())
 
-    def describe(self, name:str) -> Dict[str, str]:
-        return self.callDef[name].get('params', {})
+    def describe(self, name:str) -> OrderedDict[str, str]:
+        return self.callDef[name]['params']
 
     def getResponseTransform(self, name:str) -> Optional[str]:
         return self.callDef[name]['response']['transform']

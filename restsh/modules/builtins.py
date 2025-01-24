@@ -10,6 +10,7 @@ from ..evaluate import dereference, wrap, Eval, Builtin, Array, Function, Servic
     , Integer, Float, Null, Constant
 from ..token import tokens, Op
 from ..repl import repLoop
+from ..moduleUtils import builtin
 
 builtins:Dict[
         str,
@@ -50,9 +51,9 @@ def add(
     return wrapper
 
 
-@add(
+@builtin(
     'size',
-    {'of': 'any'},
+    [('of', 'any')],
     'Returns the number of elements in an array, object, or string, or the number of parameters to a function')
 def bSize(environment:Environment, args:Dict[str,Eval]) -> Any:
     value = args['of']
@@ -71,7 +72,7 @@ def bSize(environment:Environment, args:Dict[str,Eval]) -> Any:
         return environment.getVariable('null')
 
 
-@add('eval', {'code': 'string'}, 'Evaluate a string as a restsh command')
+@builtin('eval', [('code', 'string')], 'Evaluate a string as a restsh command')
 def bEval(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     value = args['code']
     env = Environment(environment)
@@ -84,7 +85,7 @@ def bEval(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return repLoop(env)
 
 
-@add('type', {'of': 'any'}, 'Get the type of a value')
+@builtin('type', [('of', 'any')], 'Get the type of a value')
 def bType(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     value = args['of']
 
@@ -100,7 +101,7 @@ def bType(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return wrap(typeName)
     
 
-@add('map', {'arr': 'array', 'fn': 'function[item,index]'})
+@builtin('map', [('arr', 'array'), ('fn', 'function[item,index]')])
 def bMap(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     array = cast(Array, args['arr'])
     func = cast(Function, args['fn'])
@@ -115,7 +116,7 @@ def bMap(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return Array(result)
 
 
-@add('filter', {'arr': 'array', 'fn': 'function[item,index]'})
+@builtin('filter', [('arr', 'array'), ('fn', 'function[item,index]')])
 def bFilter(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     array = cast(Array, args['arr'])
     func = cast(Function, args['fn'])
@@ -132,7 +133,7 @@ def bFilter(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return Array(result)
 
 
-@add('reduce', {'arr': 'array', 'fn': 'function[accum,item,index]'}, 'Reduce left-to-right')
+@builtin('reduce', [('arr', 'array'), ('fn', 'function[accum,item,index]')], 'Reduce left-to-right')
 def bReduce(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     array = cast(Array, args['arr'])
     func = cast(Function, args['fn'])
@@ -152,7 +153,7 @@ def bReduce(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return accum
 
 
-@add('rreduce', {'arr': 'array', 'fn': 'function[accum,item,index]'}, 'Reduce right-to-left')
+@builtin('rreduce', [('arr', 'array'), ('fn', 'function[accum,item,index]')], 'Reduce right-to-left')
 def bRreduce(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     array = cast(Array, args['arr'])
     func = cast(Function, args['fn'])
@@ -172,7 +173,7 @@ def bRreduce(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return accum
 
 
-@add('do', {'fn': 'function[]'}, 'Call a function until it returns false')
+@builtin('do', [('fn', 'function[]')], 'Call a function until it returns false')
 def bDo(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     func = cast(Function, args['fn'])
 
@@ -185,7 +186,7 @@ def bDo(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return Null()
 
 
-@add('string', {'value': 'any'}, 'Convert a value into a string')
+@builtin('string', [('value', 'any')], 'Convert a value into a string')
 def bString(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     value = args['value']
 
@@ -195,7 +196,7 @@ def bString(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
         return String(repr(value))
 
 
-@add('boolean', {'value': 'any'})
+@builtin('boolean', [('value', 'any')])
 def bBoolean(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     value = args['value']
 
@@ -205,7 +206,7 @@ def bBoolean(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
         return Boolean.truthy(value)
 
 
-@add('integer', {'value': 'any'})
+@builtin('integer', [('value', 'any')])
 def bInteger(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     value = args['value']
 
@@ -224,7 +225,7 @@ def bInteger(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
         return Integer(0)
 
 
-@add('sh', {'cmd': 'string'})
+@builtin('sh', [('cmd', 'string')])
 def bSh(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     cmd = args['cmd']
 
@@ -237,7 +238,7 @@ def bSh(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
         return Null()
 
 
-@add('grep', {'text': 'string', 'for': 'string', 'case': '?boolean'}, 'Search text for a regular expression')
+@builtin('grep', [('text', 'string'), ('for', 'string'), ('case', '?boolean')], 'Search text for a regular expression')
 def bGrep(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     text = cast(String, args['text']).getValue()
     forStr = cast(String, args['for']).getValue()
@@ -250,7 +251,7 @@ def bGrep(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return Boolean(re.search(forStr, text, **regexargs) is not None)
 
 
-@add('split', {'text': 'string', 'on': 'string'}, 'Split a string on a regular expression')
+@builtin('split', [('text', 'string'), ('on', 'string')], 'Split a string on a regular expression')
 def bSplit(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     text = cast(String, args['text']).getValue()
     onStr = cast(String, args['on']).getValue()
@@ -258,7 +259,7 @@ def bSplit(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return Array([String(string) for string in re.split(onStr, text)])
 
 
-@add('join', {'with': 'string', 'arr': 'array'}, 'Join the elements of an array into a string')
+@builtin('join', [('with', 'string'), ('arr', 'array')], 'Join the elements of an array into a string')
 def bJoin(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     text = cast(String, args['with']).getValue()
     array = cast(Array, args['arr']).elements
@@ -266,37 +267,37 @@ def bJoin(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     return wrap(text.join([str(elm) for elm in array]))
 
 
-@add('tojson', {'val': 'any'}, 'Convert ')
+@builtin('tojson', [('val', 'any')], 'Convert a value to its JSON representation')
 def bTojson(environment:Environment, args:Dict[str,Eval]) -> str:
     val = args['val']
     return val.toJson() #String(json.dumps(val.toPython()))
 
 
-@add('parsejson', {'str': 'string'})
+@builtin('parsejson', [('str', 'string')])
 def bParsejson(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     string = cast(String, args['str']).getValue()
     return wrap(json.loads(string))
 
 
-@add('b64encode', {'text': 'string'}, 'Encode a string as base-64')
+@builtin('b64encode', [('text', 'string')], 'Encode a string as base-64')
 def bB64encode(environment:Environment, args:Dict[str,Eval]) -> Any:
     string = cast(String, args['text']).getValue()
     return base64.b64encode(string.encode('utf-8')).decode('utf-8')
 
 
-@add('b64decode', {'b64': 'string'}, 'Decode a base-64 as a string')
+@builtin('b64decode', [('b64', 'string')], 'Decode a base-64 as a string')
 def bB64decode(environment:Environment, args:Dict[str,Eval]) -> Any:
     b64 = cast(String, args['b64']).getValue()
     return base64.b64decode(b64).decode('utf-8')
 
 
-@add('print', {'text': 'string'})
+@builtin('print', [('text', 'string')])
 def bPrint(environment:Environment, args:Dict[str,Eval]) -> Any:
     text = cast(String, args['text']).getValue()
     return environment.print(text)
 
 
-@add('get', {'obj': 'object', 'name': 'string'}, 'Get a property of an object by name')
+@builtin('get', [('obj', 'object'), ('name', 'string')], 'Get a property of an object by name')
 def bGet(environment:Environment, args:Dict[str,Eval]) -> Any:
     name = cast(String, args['name']).getValue()
     obj = cast(Object, args['obj'])
@@ -317,9 +318,8 @@ def bSet(environment:Environment, args:Dict[str,Union[Eval, Cell]]) -> Union[Eva
 
     return cell
 
-builtins['set'] = (bSet, {'var': 'any', 'value': 'any'}, 'Set or define a variable')
 
-@add('source', {'file': 'string'})
+@builtin('source', [('file', 'string')])
 def bSource(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     filename = cast(String, args['file']).getValue()
 
@@ -333,7 +333,7 @@ def bSource(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
             environment.loop = True
 
 
-@add('defOperator', {'sym': 'string', 'func': 'function'}, 'Define a new operator')
+@builtin('defOperator', [('sym', 'string'), ('func', 'function')], 'Define a new operator')
 def bDefOperator(environment:Environment, args:Dict[str,Eval]) -> Any:
     opre = next(regex for token, regex in tokens if token == Op)
     chars = opre.pattern[1:-2]
@@ -352,8 +352,12 @@ def bDefOperator(environment:Environment, args:Dict[str,Eval]) -> Any:
 
 
 def register(environment:Environment):
-    for name, (builtin, params, description) in builtins.items():
-        environment.setVariable(
-            name,
-            Builtin(name, builtin, params, description))
+    module = sys.modules[__name__]
+    for name, value in module.__dict__.items():
+        if isinstance(value, Builtin):
+            environment.setVariable(value.name, value)
 
+    # set is special
+    environment.setVariable(
+        'set',
+        Builtin('set', bSet, [('var', 'any'), ('value', 'any')], 'Set or define a variable'))

@@ -267,6 +267,7 @@ dictObject = Production(
 
 call = Production(
     (Call, [expression, LParen, argList, RParen]),
+    (Call, [expression, LParen, elementList, RParen]),
     (Call, [expression, LParen, RParen]),
     name='call'
     )

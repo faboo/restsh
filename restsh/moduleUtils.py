@@ -4,7 +4,7 @@ from .evaluate import Builtin, Eval, dereference, wrap
 
 def builtin(
         name:str,
-        params:Dict[str,str],
+        params:list[tuple[str,str]],
         desc:Optional[str]=None
         ) -> Any:
     def wrapper(func:Callable[[Any, Any], Any]) -> Builtin:
