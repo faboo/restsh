@@ -40,9 +40,14 @@ $ exit
 
 ## Installation
 
-To install you can either use the provided install.sh script, or from the top of the source directory, simply:
+You can get the latest release from pip:
 
-	$ pip3 install .
+    $ pip install restsh
+
+or from the source:
+
+    $ pip install .
+
 
 ## Getting Help
 
