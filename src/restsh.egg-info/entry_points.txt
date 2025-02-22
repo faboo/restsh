@@ -1,2 +1,0 @@
-[console_scripts]
-restsh = restsh.__main__:main

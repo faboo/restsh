@@ -1,10 +1,11 @@
 docker/
 ?env/
-*.egg-info/*
+src/*.egg-info/*
 html/
 doctrees/
 .mypy_cache/
 build/
+dist/
 *.swp
 *.swo
 *.log
