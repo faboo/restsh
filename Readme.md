@@ -42,7 +42,7 @@ $ exit
 
 You can get the latest release from pip:
 
-    $ pip install restsh
+    $ pip install fa-restsh
 
 or from the source:
 
