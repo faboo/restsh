@@ -1,0 +1,759 @@
+Metadata-Version: 2.2
+Name: restsh
+Version: 1.0.0
+Summary: REST and RPC processing, scriptable, shell
+Author-email: Ray Wallace III <rwallace3@proton.me>
+License: GNU GENERAL PUBLIC LICENSE
+        
+        Version 2, June 1991
+        
+        Copyright (C) 1989, 1991 Free Software Foundation, Inc.  <https://fsf.org/>
+        Everyone is permitted to copy and distribute verbatim copies of this license
+        document, but changing it is not allowed.
+        
+        Preamble
+        
+        The licenses for most software are designed to take away your freedom to share
+        and change it. By contrast, the GNU General Public License is intended to
+        guarantee your freedom to share and change free software--to make sure the
+        software is free for all its users. This General Public License applies to most
+        of the Free Software Foundation's software and to any other program whose
+        authors commit to using it. (Some other Free Software Foundation software is
+        covered by the GNU Lesser General Public License instead.) You can apply it to
+        your programs, too.
+        
+        When we speak of free software, we are referring to freedom, not price. Our
+        General Public Licenses are designed to make sure that you have the freedom to
+        distribute copies of free software (and charge for this service if you wish),
+        that you receive source code or can get it if you want it, that you can change
+        the software or use pieces of it in new free programs; and that you know you can
+        do these things.
+        
+        To protect your rights, we need to make restrictions that forbid anyone to deny
+        you these rights or to ask you to surrender the rights. These restrictions
+        translate to certain responsibilities for you if you distribute copies of the
+        software, or if you modify it.
+        
+        For example, if you distribute copies of such a program, whether gratis or for a
+        fee, you must give the recipients all the rights that you have. You must make
+        sure that they, too, receive or can get the source code. And you must show them
+        these terms so they know their rights.
+        
+        We protect your rights with two steps: (1) copyright the software, and (2) offer
+        you this license which gives you legal permission to copy, distribute and/or
+        modify the software.
+        
+        Also, for each author's protection and ours, we want to make certain that
+        everyone understands that there is no warranty for this free software. If the
+        software is modified by someone else and passed on, we want its recipients to
+        know that what they have is not the original, so that any problems introduced by
+        others will not reflect on the original authors' reputations.
+        
+        Finally, any free program is threatened constantly by software patents. We wish
+        to avoid the danger that redistributors of a free program will individually
+        obtain patent licenses, in effect making the program proprietary. To prevent
+        this, we have made it clear that any patent must be licensed for everyone's free
+        use or not licensed at all.
+        
+        The precise terms and conditions for copying, distribution and modification
+        follow.  TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+        
+        0. This License applies to any program or other work which contains a notice
+        placed by the copyright holder saying it may be distributed under the terms of
+        this General Public License. The "Program", below, refers to any such program or
+        work, and a "work based on the Program" means either the Program or any
+        derivative work under copyright law: that is to say, a work containing the
+        Program or a portion of it, either verbatim or with modifications and/or
+        translated into another language. (Hereinafter, translation is included without
+        limitation in the term "modification".) Each licensee is addressed as "you".
+        
+        Activities other than copying, distribution and modification are not covered by
+        this License; they are outside its scope. The act of running the Program is not
+        restricted, and the output from the Program is covered only if its contents
+        constitute a work based on the Program (independent of having been made by
+        running the Program). Whether that is true depends on what the Program does.
+        
+        1. You may copy and distribute verbatim copies of the Program's source code as
+        you receive it, in any medium, provided that you conspicuously and appropriately
+        publish on each copy an appropriate copyright notice and disclaimer of warranty;
+        keep intact all the notices that refer to this License and to the absence of any
+        warranty; and give any other recipients of the Program a copy of this License
+        along with the Program.
+        
+        You may charge a fee for the physical act of transferring a copy, and you may at
+        your option offer warranty protection in exchange for a fee.
+        
+        2. You may modify your copy or copies of the Program or any portion of it, thus
+        forming a work based on the Program, and copy and distribute such modifications
+        or work under the terms of Section 1 above, provided that you also meet all of
+        these conditions:
+        
+            a) You must cause the modified files to carry prominent notices stating that
+        you changed the files and the date of any change.  b) You must cause any work
+        that you distribute or publish, that in whole or in part contains or is derived
+        from the Program or any part thereof, to be licensed as a whole at no charge to
+        all third parties under the terms of this License.  c) If the modified program
+        normally reads commands interactively when run, you must cause it, when started
+        running for such interactive use in the most ordinary way, to print or display
+        an announcement including an appropriate copyright notice and a notice that
+        there is no warranty (or else, saying that you provide a warranty) and that
+        users may redistribute the program under these conditions, and telling the user
+        how to view a copy of this License. (Exception: if the Program itself is
+        interactive but does not normally print such an announcement, your work based on
+        the Program is not required to print an announcement.) 
+        
+        These requirements apply to the modified work as a whole. If identifiable
+        sections of that work are not derived from the Program, and can be reasonably
+        considered independent and separate works in themselves, then this License, and
+        its terms, do not apply to those sections when you distribute them as separate
+        works. But when you distribute the same sections as part of a whole which is a
+        work based on the Program, the distribution of the whole must be on the terms of
+        this License, whose permissions for other licensees extend to the entire whole,
+        and thus to each and every part regardless of who wrote it.
+        
+        Thus, it is not the intent of this section to claim rights or contest your
+        rights to work written entirely by you; rather, the intent is to exercise the
+        right to control the distribution of derivative or collective works based on the
+        Program.
+        
+        In addition, mere aggregation of another work not based on the Program with the
+        Program (or with a work based on the Program) on a volume of a storage or
+        distribution medium does not bring the other work under the scope of this
+        License.
+        
+        3. You may copy and distribute the Program (or a work based on it, under Section
+        2) in object code or executable form under the terms of Sections 1 and 2 above
+        provided that you also do one of the following:
+        
+            a) Accompany it with the complete corresponding machine-readable source
+        code, which must be distributed under the terms of Sections 1 and 2 above on a
+        medium customarily used for software interchange; or, b) Accompany it with a
+        written offer, valid for at least three years, to give any third party, for a
+        charge no more than your cost of physically performing source distribution, a
+        complete machine-readable copy of the corresponding source code, to be
+        distributed under the terms of Sections 1 and 2 above on a medium customarily
+        used for software interchange; or, c) Accompany it with the information you
+        received as to the offer to distribute corresponding source code. (This
+        alternative is allowed only for noncommercial distribution and only if you
+        received the program in object code or executable form with such an offer, in
+        accord with Subsection b above.) 
+        
+        The source code for a work means the preferred form of the work for making
+        modifications to it. For an executable work, complete source code means all the
+        source code for all modules it contains, plus any associated interface
+        definition files, plus the scripts used to control compilation and installation
+        of the executable. However, as a special exception, the source code distributed
+        need not include anything that is normally distributed (in either source or
+        binary form) with the major components (compiler, kernel, and so on) of the
+        operating system on which the executable runs, unless that component itself
+        accompanies the executable.
+        
+        If distribution of executable or object code is made by offering access to copy
+        from a designated place, then offering equivalent access to copy the source code
+        from the same place counts as distribution of the source code, even though third
+        parties are not compelled to copy the source along with the object code.
+        
+        4. You may not copy, modify, sublicense, or distribute the Program except as
+        expressly provided under this License. Any attempt otherwise to copy, modify,
+        sublicense or distribute the Program is void, and will automatically terminate
+        your rights under this License. However, parties who have received copies, or
+        rights, from you under this License will not have their licenses terminated so
+        long as such parties remain in full compliance.
+        
+        5. You are not required to accept this License, since you have not signed it.
+        However, nothing else grants you permission to modify or distribute the Program
+        or its derivative works. These actions are prohibited by law if you do not
+        accept this License. Therefore, by modifying or distributing the Program (or any
+        work based on the Program), you indicate your acceptance of this License to do
+        so, and all its terms and conditions for copying, distributing or modifying the
+        Program or works based on it.
+        
+        6. Each time you redistribute the Program (or any work based on the Program),
+        the recipient automatically receives a license from the original licensor to
+        copy, distribute or modify the Program subject to these terms and conditions.
+        You may not impose any further restrictions on the recipients' exercise of the
+        rights granted herein. You are not responsible for enforcing compliance by third
+        parties to this License.
+        
+        7. If, as a consequence of a court judgment or allegation of patent infringement
+        or for any other reason (not limited to patent issues), conditions are imposed
+        on you (whether by court order, agreement or otherwise) that contradict the
+        conditions of this License, they do not excuse you from the conditions of this
+        License. If you cannot distribute so as to satisfy simultaneously your
+        obligations under this License and any other pertinent obligations, then as a
+        consequence you may not distribute the Program at all. For example, if a patent
+        license would not permit royalty-free redistribution of the Program by all those
+        who receive copies directly or indirectly through you, then the only way you
+        could satisfy both it and this License would be to refrain entirely from
+        distribution of the Program.
+        
+        If any portion of this section is held invalid or unenforceable under any
+        particular circumstance, the balance of the section is intended to apply and the
+        section as a whole is intended to apply in other circumstances.
+        
+        It is not the purpose of this section to induce you to infringe any patents or
+        other property right claims or to contest validity of any such claims; this
+        section has the sole purpose of protecting the integrity of the free software
+        distribution system, which is implemented by public license practices. Many
+        people have made generous contributions to the wide range of software
+        distributed through that system in reliance on consistent application of that
+        system; it is up to the author/donor to decide if he or she is willing to
+        distribute software through any other system and a licensee cannot impose that
+        choice.
+        
+        This section is intended to make thoroughly clear what is believed to be a
+        consequence of the rest of this License.
+        
+        8. If the distribution and/or use of the Program is restricted in certain
+        countries either by patents or by copyrighted interfaces, the original copyright
+        holder who places the Program under this License may add an explicit
+        geographical distribution limitation excluding those countries, so that
+        distribution is permitted only in or among countries not thus excluded. In such
+        case, this License incorporates the limitation as if written in the body of this
+        License.
+        
+        9. The Free Software Foundation may publish revised and/or new versions of the
+        General Public License from time to time. Such new versions will be similar in
+        spirit to the present version, but may differ in detail to address new problems
+        or concerns.
+        
+        Each version is given a distinguishing version number. If the Program specifies
+        a version number of this License which applies to it and "any later version",
+        you have the option of following the terms and conditions either of that version
+        or of any later version published by the Free Software Foundation. If the
+        Program does not specify a version number of this License, you may choose any
+        version ever published by the Free Software Foundation.
+        
+        10. If you wish to incorporate parts of the Program into other free programs
+        whose distribution conditions are different, write to the author to ask for
+        permission. For software which is copyrighted by the Free Software Foundation,
+        write to the Free Software Foundation; we sometimes make exceptions for this.
+        Our decision will be guided by the two goals of preserving the free status of
+        all derivatives of our free software and of promoting the sharing and reuse of
+        software generally.
+        
+        NO WARRANTY
+        
+        11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE
+        PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED
+        IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS
+        IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT
+        NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+        PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE
+        PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+        ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+        
+        12. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL
+        ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE THE
+        PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL,
+        SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY
+        TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+        RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF
+        THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER
+        PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.  END OF TERMS AND
+        CONDITIONS
+        
+Project-URL: Homepage, https://github.com/faboo/restsh
+Project-URL: Repository, https://github.com/faboo/restsh.git
+Keywords: shell,REST,API,testing
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU General Public License v2 (GPLv2)
+Classifier: Typing :: Typed
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: COPYING
+Requires-Dist: pyyaml
+Requires-Dist: python-dateutil
+Provides-Extra: amqp
+Requires-Dist: amqp; extra == "amqp"
+Provides-Extra: dev
+Requires-Dist: tox; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Requires-Dist: types-PyYAML; extra == "dev"
+Requires-Dist: types-python-dateutil; extra == "dev"
+Requires-Dist: pylint; extra == "dev"
+
+# About Restsh
+
+Restsh is a shell-like command interpreter for working with RESTful (or REST-esque) remote services.
+
+Often, when you're doing ad-hoc, exploratory, or emergency work with a service like that you're using curl, wget, or GUI interfaces, often in conjunction with some grepping, cutting, and pasting into new requests.
+
+But what if instead, you could treat those service calls like simple functions, and their results and arguments like the data that they *are*?
+
+Enter restsh, combining a shell-like experience for quick and dirty work, and a method for describing how a REST service works (parameter types and so on) so it can be used like a set of functions. This allows you to easily combine, chain, repeat, and script different service calls.
+
+
+## Sample Session
+
+An example session, using the example outlook service to check emails in an outlook mailbox:
+
+```
+REST Shell 
+ 
+Use the "help" command to get help, and "exit" to exit the shell. 
+$ import outlook
+$ help outlook.setAuthentication
+outlook.setAuthentication is a function 
+ 
+Replace the authentication data for this service. 
+
+It takes 1 arguments: 
+  auth: string 
+ 
+$ outlook.setAuthentication(auth: "eyJ0eXAiOiJKV1Q....")
+Service[outlook]
+$ let messages = outlook.getMessages(mboxId: "me@example.com")
+$ size(of: messages)
+6
+$ let getSender = \item. item.Sender.EmailAddress.Name
+$ let senders = map(arr: messages, fn: getSender)
+$ senders
+[ "Steven", "Molly", "Mark", "Target", "Louise", "Campaign for Better Times" ]
+$ exit
+```
+
+## Installation
+
+To install you can either use the provided install.sh script, or from the top of the source directory, simply:
+
+	$ pip3 install .
+
+## Getting Help
+
+The shell contains a small help system invoked with the `help` command. Use it on its own to see a brief overview of the Restsh session, provide it a value to show information about it. For functions, this includes parameters and their expected types. For objects, this includes each of their properties and their current value types.
+
+Built-in functions and objects, and service objects and methods may include additional information about their use as well.
+
+## But WHY Though?
+
+I hear what you're saying, "This is all written in Python. Can't you just write Python scripts instead?" and yes, you could. And if you're going to be writing anything permanent, you absolutely should.
+
+However, Restsh aims to be a pleasant, helpful environment for when you want to experiment, or need to get something oddly specific done fast.
+
+# Basics
+
+## Types
+
+Restsh supports four simple types:
+
+* strings
+
+	* Strings are double quoted, like:
+	
+		`"Hello World!"`
+	
+	* Double quotes, newlines, and tabs inside a string can be escaped with a `\`
+	
+		`"\"Learn programming,\" they said.\n\"It'll be fun,\" they said."`
+
+* integers
+
+	* Simple series of digits (in base 10), optionally starting with - or +
+
+		`12`
+
+		`007`
+
+		`-15`
+
+		`+32`
+
+* floats
+	
+	* Like integers, but with a decimal point
+	
+		`12.5`
+
+		`007.0`
+
+		`-3.141592`
+
+		`+0.1`
+
+* booleans
+
+	* True and false:
+	
+		`true`
+
+		`false`
+
+It supports two compound types:
+
+* arrays
+
+	* Defined by bracketing a series of values separated by commas
+	
+		`[1, "two", 3.0]`
+
+	* Arrays support subscripts to select specific elements
+	
+		`myArray[1]`
+
+* objects
+
+	* Objects are like dictionaries and are defined by a series of key-value-pairs
+	
+		`{ color: "red", radius: 12 }`
+
+While array elements and object properties may be modified, neither arrays nor
+objects may be extended or shrunk after creation.
+
+## Variables
+
+Variables are declared with `let`, and can be assigned values with `=`.
+
+	$ let pi
+	$ pi = 3.14159 
+	$ let tau = 6.28318
+
+Assignment with `=` is a _statement_ and can only be used at the prompt or the top-level of scripts. To set the value of a variable within a function, for instance, use the `set` function.
+
+	$ let foo = 2
+	$ let setFoo = \to. set(var:foo, value: to)
+	$ setFoo(to:4)
+	4
+	$ foo
+	4
+
+## Selection (if/then)
+
+The if/then/else expression can be used to make choices.
+
+	$ if true then 1 else 2
+	1
+	$ if false then 1 else 2
+	2
+	$ let f = 2
+	$ if 2 - f then 1 else 3
+	3
+	$ let gg = \v. if v < 4 then "low" else "high"
+	$ gg(v:3)
+	low
+	$ gg(v:6)
+	high
+	$ 
+
+If the `if` part of the expression is "truthy", then the `then` part is evaluated and is the result of the expression. Otherwise, the `else` portion is evaluated as the result.
+
+### Truthiness
+
+The following values are considered "true":
+
+* `true`
+
+* Non-zero integers
+
+* Non-zero floats
+
+* Arrays of non-zero size
+
+* All other values except `null`
+
+Values considered "false":
+
+* `false`
+
+* `0`
+
+* `0.0`
+
+* Arrays of size 0
+
+* `null`
+
+
+## Functions
+
+Custom functions are defined like this:
+
+	\foo, bar. foo + bar
+
+where the above is a function that takes two arguments, `foo` and `bar`, and returns their sum. You might call it like
+this:
+
+	$ let sum = \foo, bar. foo - bar
+	$ sum(foo: 5, bar: 3)
+	2
+	$ sum(bar: 3, foo: 5)
+	2
+
+or, with positional arguments:
+
+	$ sum(5, 3)
+	2
+
+Notice that the order of the arguments doesn't matter - just that they're named correctly. Built-in functions and service methods may also have specific type requirements for their arguments.
+
+If you need to do more than one thing in a function, you can chain together expressions with `;`. The final expression will be the result of the function.
+
+	$ let accum = 0
+	$ let bump = \.
+	.  set(var: accum, value: accum + 1);
+	.  print(text: "Accum: " | string(value: accum));
+	.  accum < 4
+	$ do(fn: bump)
+	Accum: 1
+	Accum: 2
+	Accum: 3
+	Accum: 4
+	null
+
+## Handling errors
+
+Most errors cancel execution of a command. However, if it's desirable to ignore an error, a `try` expression can be used to instead return `null` in case of an error.
+
+	$ let num = 4
+	$ let den = 0
+	$ num / den
+	error: ZeroDivisionError: division by zero
+	$ try num / den
+	error: ZeroDivisionError: division by zero
+	null
+	$ 
+
+## Comments
+
+You can include a comment in a script (or at the prompt if you want) with the `#` character.
+
+	# This is a comment
+	print(text: "Write scripts. Wage wars. Die handsome.") # So is this
+
+# Web Requests
+
+Simple web requests can be made with the `http` object. `http`'s methods all take a complete URL, and return the text response of the request. On a non-2XX or 1XX response, an error is thrown with the status text of the response.
+
+	$ http.get(url:"http://www.example.com")
+	"<html><body><p>This domain is for use in illustrative examples in documents.</p></body></html>"
+	$ 
+
+For more complex requests, you will need to define a service.
+
+# Services
+
+Services are the heart of restsh. A service is an object with methods that make restful calls and return their result. Each service is defined by a YAML file. There are several examples included in the "example-services" directory.
+
+A service can be added to the session with the `import` command
+
+	$ import msgraph
+
+The `import` command adds the ".yaml" extension to the service name specified to create the filename where the service is defined. To open the file, restsh first looks in the current directory, and then in the ~/.restsh directory.
+
+After a service is imported, a new object with the service's name as added to the session. That object has a method for each call defined in its YAML file, plus the following predefined methods:
+
+* `setHost(host)` - Replaces the host and port defined in the service definition
+
+* `setAuthentication(auth)` - Sets or replaces the authentication data of the service. This persists between calls, but is only used if the authentication type is set in the service definition.
+
+NOTE: A service may be *reimported*, in which case its yaml description is reevulated, allowing you to make changes or add new calls during a session. Changes to the host or authentication will be reset.
+
+
+## Defining Services
+
+Service definitions are layed out as follows:
+
+	---
+	protocol: http|https|amqp
+	host: host & port
+	description: displayed by the help command
+	authentication:
+	  type: basic|bearer|cookie|etc
+	  data: auth data string
+	call:
+	  - name: method name
+	    description: displayed by the help command
+	    timeout: call timeout in seconds; 60 second default
+	    params:
+	      method-param1: data type
+	      method-param2: data type
+	    headers:
+	      protocol-header-1: value  
+	      protocol-header-2: value  
+	    body: text of the request body, if any
+	    response:
+	      type: json|text
+	      transform: restsh code
+	      error: restsh code
+	    # For http and https protocols:
+	    path: path portion of the URL
+	    query: query string portion of the URL	    
+	    fragment: hash string portion of the URL
+
+At the top-level, only `protocol`, `host`, and `call` are required. If the `authentication` section is omitted, no authentication will be done, even if you later call `setAuthentication` on the service object.
+
+The `call` section is a list of service call definitions. Here, only the `name` property of a call is truly required.
+
+The `params` section is a list of parameter names and types. The parameter names will be used for the service method's parameters, and as template variables for the text attributes of the call definition.
+
+The `body` section is text that will be sent as the data of the request.
+
+For `http` and `https` requests, `path`, `query`, and `fragment` are combined with the `host` to create the URL to connect to.
+
+The `response` section defines how to handle the service response. By default the full text of th response is returned as a string, but the `type` can be set to `json` parse the response as JSON instead. The `transform` section allows you to specify a restsh command whose result replaces the default response object as the call method's result. Similarly, the `error` section is a restsh command whose result, if `true`, causes the call method to throw an error rather than return a result.
+
+## Authentication Data
+
+The authentication `data` field is the actual authentication token etc. that is passed to the service, so it can (and probably should) be omitted from the service file and instead set during a restsh session with `setAuthentication`.
+
+For `basic` authentication, the user name and password should both be provided, separated by a `:`.
+
+Similarly, for `cookie` authentication, the cookie name and value should be provided, also separated by a `:`.
+
+The `http` and `https` protocols allowed any other arbitrary `type` to be specified. The specified type (`bearer` for instance) will be used as the "scheme" of the HTTP `authorization` header, and the authentication data will be provided verbatim as the credentials.
+
+The `amqp` protocol only supports `basic` authentication.
+
+## Parameter Data Types
+
+The following type names map directly to types described above:
+
+* string
+* integer
+* float
+* boolean
+* array
+* object
+* function
+
+In addition, the following meta types meta-types can be used:
+
+* any
+  * Any value at all
+* number
+  * Either an integer or a float
+* collection
+  * Either an array or an object
+
+The array, collection, object, and function types may be specified with further descriptors in brackets, such as `array[integer]` to denote an array of integers. These descriptors are only informational and not currently enforced by the type checker.
+
+## Text Templates
+
+The following call attributes allow for template variables:
+
+* headers
+* body
+* path
+* query
+* fragment
+
+Template variables are specified in text by surrounding any of the named call parameters in `$` characters. (To include a `$` in the text directly use `$$`.) The value of corresponding method argument will replace the template variable.
+
+Take the following call definition on a service called `userprofile`:
+
+	name: setDescription
+	path: /profile
+	method: PATCH
+	params:
+	  text: string
+	body: |
+	  { "description": "$text$"
+	  }
+
+This would be called from the shell like
+
+	$ import userprofile
+	$ userprofile.setDescription(text: "I love cats and rombic solids")
+	"updated!"
+	$
+
+This call would send a PATCH request with the body
+
+	{ "description": "I love cats and rombic solids"
+	}
+
+## Response Section
+
+### type
+
+The `type` attribute can be either `text`, in which case the response will be a string that is the entire response body, or `json` in which case the result will be parsed as JSON and the response type will depend on the content of the response itself.
+
+### transform
+
+The `transform` attribute is a restsh command. Within the transform command, every top level variable, function, and operator is available for use. In addition, the variable `response` is defined, containing the default service call response (dependant on the specified `type`).
+
+Services using the `http` and `https` protocols additionally provide `status`, containing the HTTP status code of the response, and `headers` an object containing the response headers.
+
+### error
+
+The `error` attribute functions much the same as the `transform` attribute. However, the `error` command must return either `true`, if the response should be considered failed, or `false` if it was successful.
+
+## AMQP Support
+
+Restsh uses the amqp package for AMQP 0-9 support. However, it is not a hard
+requirement. If you want to define AMQP-based services, you will need to
+pip-install amqp separately.
+
+Services using the `amqp` protocol only supports `basic` authentication (or none).
+
+Header values for AMQP calls may be integers and floats in addition to strings.
+
+# Scripting
+
+On startup, restsh will look for a file named `~/.restshrc` and run all of the commands there before the first prompt. Additionally, you can direct restsh to run other script files before first prompt with the `--environment` command-line argument.
+
+If other files are provided on the command-line, they will be run in order and then the interpreter will exit. This can be combined with `--environment` arguments.
+
+## Standalone Scripts
+
+While in general you probably want to use something like Python for standalone scripts, you can create Restsh scripts similarly to shell scripts:
+
+	$ cat > runme <<END
+	#!/usr/local/bin/restsh
+
+	print(text: "You ran me!")
+	END
+	$ chmod u+x runme
+	$ ./runme
+	You ran me!
+	$
+
+Arguments passed to the script on the command line are stored as an array of strings in the `args` top-level variable.
+
+# Sessions
+
+You can save and load the current state of the shell with the `session` object.
+
+To save the current session, use `session.save`, like so:
+
+	$ import weatherapi
+	$ let data = weatherapi.today()
+	$ let tempF = data.temp * 1.8 + 32
+	$ session.save(name: "weather")
+
+Our two variables, `data` and `tempF`, and the fact that we imported weatherapi are saved in a session named "weather" (and "weather" becomes the default session).
+
+We can reload this session with `session.open`:
+
+	$ session.open(name: "weather")
+	$ print(text: "Temperature: " | string(value: tempF) | "F")
+	Temperature: 45F
+
+When a session is saved or opened it becomes the `current` session, and future calls to `save` will save to that session by default.
+
+	$ session.open(name: "weather")
+	$ let precip = data.precipitation
+	$ session.save()
+
+By default, the current session name is the empty string.
+
+Additionally, you can clear the current session using `session.clear`:
+
+	$ session.open(name: "weather")
+	$ print(text: precip)
+	Light Rain
+	$ session.clear()
+	$ print(text: string(value: tempF))
+	error: Undefined variable: 'tempF'
+
+The session management isn't perfect, but it should do the right thing most of the time.
+
+# Copyright
+
+REST Shell is copyright 2024 Raymond W. Wallace III
+
+You may copy or modify it under the terms of the [GNU Public License version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
+
+

@@ -1,9 +1,9 @@
-from typing import cast, Union, Dict, Callable, Tuple, List, Optional, Any
+from typing import cast, Union, Dict, Optional
 from urllib import request
 from urllib.error import HTTPError
 from ..moduleUtils import builtin
 from ..environment import Environment, Cell
-from ..evaluate import dereference, wrap, DictObject, Builtin, String, Eval
+from ..evaluate import dereference, wrap, DictObject, String, Eval
 
 def bRequest(environment:Environment, method:str, url:str, data:Optional[str]) -> Union[Eval, Cell]:
     headers = \

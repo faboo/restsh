@@ -88,6 +88,7 @@ def bEval(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
 @builtin('type', [('of', 'any')], 'Get the type of a value')
 def bType(environment:Environment, args:Dict[str,Eval]) -> Union[Eval, Cell]:
     value = args['of']
+    typeName = 'custom'
 
     if isinstance(value, Constant):
         typeName = value.__class__.__name__.lower()
@@ -287,8 +288,8 @@ def bB64encode(environment:Environment, args:Dict[str,Eval]) -> Any:
 
 @builtin('b64decode', [('b64', 'string')], 'Decode a base-64 as a string')
 def bB64decode(environment:Environment, args:Dict[str,Eval]) -> Any:
-    b64 = cast(String, args['b64']).getValue()
-    return base64.b64decode(b64).decode('utf-8')
+    b64String = cast(String, args['b64']).getValue()
+    return base64.b64decode(b64String).decode('utf-8')
 
 
 @builtin('print', [('text', 'string')])
@@ -353,7 +354,7 @@ def bDefOperator(environment:Environment, args:Dict[str,Eval]) -> Any:
 
 def register(environment:Environment):
     module = sys.modules[__name__]
-    for name, value in module.__dict__.items():
+    for value in module.__dict__.values():
         if isinstance(value, Builtin):
             environment.setVariable(value.name, value)
 

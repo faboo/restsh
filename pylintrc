@@ -411,7 +411,7 @@ variable-naming-style=camelCase
 
 # Regular expression matching correct variable names. Overrides variable-
 # naming-style.
-variable-rgx=_+|[a-z][a-zA-Z]+
+variable-rgx=_+|[a-z][a-z0-9A-Z]+
 
 
 [IMPORTS]

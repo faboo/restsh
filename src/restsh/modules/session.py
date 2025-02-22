@@ -1,4 +1,3 @@
-from typing import Any
 import os
 import re
 from ..moduleUtils import builtin
@@ -15,6 +14,7 @@ def flatten(value:Eval) -> str:
         elements = [flatten(elm.value) for elm in value.elements]
         return '[ %s ]' % ', '.join(elements)
     elif isinstance(value, DictObject):
+        #pylint: disable=protected-access
         kvps = {key: flatten(val.value) for key, val in value._properties.items()}
         return '{ %s }' % ', '.join(f'{key}: {val}' for key, val in kvps.items())
     elif isinstance(value, str):
@@ -25,7 +25,9 @@ def flatten(value:Eval) -> str:
 def legalSymbol(sym:str) -> bool:
     return bool(re.match('[_a-zA-Z][_a-zA-Z0-9]*$', sym))
 
-@builtin('save', [('name', '?string')], 'Save the current session. Saves to the current session if no name is provided.')
+@builtin('save',
+    [('name', '?string')],
+    'Save the current session. Saves to the current session if no name is provided.')
 def bSave(environment, args):
     if 'name' in args:
         name = args['name'].toPython()
@@ -40,7 +42,7 @@ def bSave(environment, args):
     while not environment.globals and environment.base is not None:
         environment = environment.base
 
-    with open(filename, 'w') as file:
+    with open(filename, 'w', encoding='utf-8') as file:
         file.write("# Maybe don't edit this file ;-)\n")
         # import services
         for service in environment.services:
@@ -55,8 +57,6 @@ def bSave(environment, args):
                 line = f'let {var} = {flatten(value)}\n'
                 file.write(line)
 
-    return None
-
 
 @builtin('open', [('name', 'string')], 'Load a saved session. Loads the current session if no name is provided.')
 def bOpen(environment, args):
@@ -67,24 +67,21 @@ def bOpen(environment, args):
     sessionObj.get('current', environment).set(wrap(name))
 
     try:
-        with open(filename) as file:
+        with open(filename, encoding='utf-8') as file:
             environment.input = file
             repLoop(environment)
+    #pylint: disable=bare-except
     except:
         pass
 
     environment.input = originalInput
     environment.loop = True
 
-    return None
-
 
 @builtin('clear', [], 'Clear the current session of new definitions and services.')
 def bClear(environment, args):
     environment.variables = { }
     environment.services = { }
-
-    return None
 
 
 sessionObj = DictObject(

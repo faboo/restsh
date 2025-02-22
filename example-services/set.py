@@ -16,14 +16,14 @@ class Set(restsh.Constant):
     def isType(self, typeDesc:str) -> bool:
         return super().isType(typeDesc) or typeDesc == 'set'
 
-@restsh.builtin('create', {'from': 'array'}, 'Create a set from the elements of an array')
+@restsh.builtin('create', [('from': 'array')], 'Create a set from the elements of an array')
 def bCreate(environment, args):
     array = args['from']
 
     return Set(array.toPython())
 
 
-@restsh.builtin('array', {'set': 'set'}, 'Return the elements of a set as an array')
+@restsh.builtin('array', [('set': 'set')], 'Return the elements of a set as an array')
 def bArray(environment, args):
     set = args['set']
 

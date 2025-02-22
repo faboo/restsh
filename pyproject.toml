@@ -1,0 +1,50 @@
+[project]
+name = "restsh"
+version = "1.0.0"
+authors = [
+    { name="Ray Wallace III", email="rwallace3@proton.me" },
+]
+description = "REST and RPC processing, scriptable, shell"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Typing :: Typed",
+]
+readme = "Readme.md"
+license = {file = "COPYING"}
+keywords = ["shell", "REST", "API", "testing"]
+dependencies = [
+    "pyyaml",
+    "python-dateutil",
+]
+
+[project.optional-dependencies]
+amqp = ["amqp"]
+dev = [
+    "tox",
+    "mypy",
+    "types-PyYAML",
+    "types-python-dateutil",
+    "pylint",
+]
+
+[project.urls]
+Homepage = "https://github.com/faboo/restsh"
+Repository = "https://github.com/faboo/restsh.git"
+
+[project.scripts]
+restsh = "restsh.__main__:main"
+
+[tool.setuptools]
+[tool.setuptools.package-data]
+restsh = ["py.typed"]
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+

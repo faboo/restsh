@@ -7,9 +7,10 @@ def bRead(environment, args):
     filename = args['file'].toPython()
 
     try:
-        with open(filename, 'r') as file:
+        with open(filename, 'r', encoding='utf-8') as file:
             contents = '\n'.join(file.readlines())
     except FileNotFoundError:
+        #pylint: disable=raise-missing-from
         raise EvaluationError(f'File not found: {filename}')
 
     return wrap(contents)
@@ -20,10 +21,8 @@ def bWrite(environment, args):
     filename = args['file'].toPython()
     text = args['text'].toPython()
 
-    with open(filename, 'w') as file:
+    with open(filename, 'w', encoding='utf-8') as file:
         file.write(text)
-
-    return None
 
 
 @builtin('append', [('file', 'string'), ('text', 'string')], 'Write a string to a file')
@@ -31,10 +30,8 @@ def bAppend(environment, args):
     filename = args['file'].toPython()
     text = args['text'].toPython()
 
-    with open(filename, 'a') as file:
+    with open(filename, 'a', encoding='utf-8') as file:
         file.write(text)
-
-    return None
 
 
 def register(environment):
