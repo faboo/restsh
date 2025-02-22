@@ -1,5 +1,5 @@
 [project]
-name = "restsh"
+name = "fa-restsh"
 version = "1.0.0"
 authors = [
     { name="Ray Wallace III", email="rwallace3@proton.me" },
